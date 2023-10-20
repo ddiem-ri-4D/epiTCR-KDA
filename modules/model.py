@@ -1,5 +1,8 @@
 import sklearn.metrics as metrics
 
+from tensorflow import keras
+from tensorflow.keras import layers
+
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix
 from sklearn.model_selection import cross_validate, GridSearchCV

@@ -8,6 +8,8 @@ from keras.models import load_model
 
 import sklearn.metrics as metrics
 
+from imblearn.under_sampling import RandomUnderSampler
+
 from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split

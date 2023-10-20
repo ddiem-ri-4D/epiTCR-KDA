@@ -5,19 +5,16 @@ import glob
 import itertools
 import warnings
 import os
+import sys
 import pandas as pd
 import numpy as np
 import modules.model as Model
 from imblearn.under_sampling import RandomUnderSampler
 
 import sklearn.metrics as metrics
+from keras.models import load_model
 
 from sklearn.model_selection import KFold
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import train_test_split
-from sklearn.svm import SVC
-from sklearn.pipeline import make_pipeline
-from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix
 from sklearn.model_selection import train_test_split, cross_validate, GridSearchCV
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.metrics import confusion_matrix,accuracy_score,precision_score,recall_score,roc_auc_score,classification_report, roc_curve, auc,f1_score
@@ -47,23 +44,30 @@ parser.add_argument("-o", "--outfile", default=sys.stdout, help="Specify output 
 args = parser.parse_args()
 
 # print('Loading and encoding the dataset..')
+print("###---LOADING DATA")
 
 DATA_TEST = pd.read_csv(args.testfile)
+DATA_TEST = DATA_TEST[["CDR3b", "epitope", "binder"]]
 
 # DATA_TEST = pd.read_csv("./DATA_FINAL/DATA_TEST_v2.csv")
 
 ###--DATA_REPRESENTATION
+print("###---DATA REPRESENTATION")
+
 X_TEST, y_TEST = Processor.DATA_REPRESENTATION(DATA_TEST),  DATA_TEST[["binder"]]
 X_TEST_cv, y_TEST_cv = Processor.cv_data_kd(X_TEST), np.squeeze(np.array(y_TEST))
 
 
 ###--TRAINING
 
+
 # student_scratch.save("model.h5")
-student_scratch.save(args.savedmodel)
-# student_scratch = load_model("model.h5")
+# student_scratch.save(args.savedmodel)
+student_scratch = load_model(args.savedmodel)
 
 ###---Evaluation
+print("###---EVALUATION")
+
 predicted_probabilities = student_scratch.predict(X_TEST_cv)
 predicted_labels = predicted_probabilities.argmax(axis=1)
 predicted_labels = (predicted_probabilities >= 0.5).astype(int)
@@ -71,8 +75,10 @@ predicted_labels = (predicted_probabilities >= 0.5).astype(int)
 df_label = pd.DataFrame(zip(predicted_probabilities.squeeze(), predicted_labels.squeeze()), columns=['proba_pred', 'binder_pred'])
 data_pred = pd.concat([DATA_TEST, df_label], axis=1)
 
+print("###---SAVE DATA")
+
 data_pred.to_csv(args.outfile, index=False)
 
-lst_unseen_result, l_lst_unseen = Processor.fn_lst_unseen(DATA_TRAIN, DATA_TEST)
-Processor.modeling_kd(data_pred,lst_unseen_result)
+# lst_unseen_result, l_lst_unseen = Processor.fn_lst_unseen(DATA_TRAIN, DATA_TEST)
+# Model.modeling_kd(data_pred,lst_unseen_result)
 

@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 import pandas as pd
 import random
 import glob
@@ -11,7 +12,10 @@ import modules.model as Model
 from imblearn.under_sampling import RandomUnderSampler
 
 import sklearn.metrics as metrics
+from tensorflow import keras
+from tensorflow.keras import layers
 
+from keras.models import load_model
 from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split
@@ -49,13 +53,20 @@ args = parser.parse_args()
 
 # print('Loading and encoding the dataset..')
 
+print("###---LOADING DATA")
+
 DATA_TRAIN = pd.read_csv(args.trainfile)
 DATA_TEST = pd.read_csv(args.testfile)
+
+DATA_TRAIN = DATA_TRAIN[["CDR3b", "epitope", "binder"]]
+DATA_TEST = DATA_TEST[["CDR3b", "epitope", "binder"]]
 
 # DATA_TRAIN = pd.read_csv("./DATA_FINAL/DATA_TRAIN.csv")
 # DATA_TEST = pd.read_csv("./DATA_FINAL/DATA_TEST_v2.csv")
 
 ###--DATA_REPRESENTATION
+print("###---DATA REPRESENTATION")
+
 DATA_TCRpep_SPLIT = Processor.DATA_REPRESENTATION(DATA_TRAIN)
 DATA_TRAIN_FULL = pd.concat([DATA_TRAIN, DATA_TCRpep_SPLIT], axis=1)
 X_TRAIN, y_TRAIN = Processor.fn_downsampling(DATA_TRAIN_FULL)
@@ -67,6 +78,8 @@ X_TEST_cv, y_TEST_cv = Processor.cv_data_kd(X_TEST), np.squeeze(np.array(y_TEST)
 
 
 ###--TRAINING
+
+print("###---TRAINING")
 
 # Create the teacher
 teacher = keras.Sequential(
@@ -146,18 +159,19 @@ student_scratch.compile(
 )
 
 # Convert the labels for binary classification
-train_labels_binary = convert_to_binary_labels(y_TRAIN_cv)
-test_labels_binary = convert_to_binary_labels(y_TEST_cv)
+train_labels_binary = y_TRAIN_cv.copy()
+test_labels_binary = y_TEST_cv.copy()
 
 # Train and evaluate student trained from scratch.
 student_scratch.fit(X_TRAIN_cv, train_labels_binary, epochs=3)
 student_scratch.evaluate(X_TEST_cv, test_labels_binary)
 
-student_scratch.save("model.h5")
+# student_scratch.save("model.h5")
 student_scratch.save(args.savemodel)
 # student_scratch = load_model("model.h5")
 
 ###---Evaluation
+print("###---EVALUATION")
 predicted_probabilities = student_scratch.predict(X_TEST_cv)
 predicted_labels = predicted_probabilities.argmax(axis=1)
 predicted_labels = (predicted_probabilities >= 0.5).astype(int)
@@ -165,8 +179,9 @@ predicted_labels = (predicted_probabilities >= 0.5).astype(int)
 df_label = pd.DataFrame(zip(predicted_probabilities.squeeze(), predicted_labels.squeeze()), columns=['proba_pred', 'binder_pred'])
 data_pred = pd.concat([DATA_TEST, df_label], axis=1)
 
+print("###---SAVE DATA")
 data_pred.to_csv(args.outfile, index=False)
 
-lst_unseen_result, l_lst_unseen = Processor.fn_lst_unseen(DATA_TRAIN, DATA_TEST)
-Processor.modeling_kd(data_pred,lst_unseen_result)
+# lst_unseen_result, l_lst_unseen = Processor.fn_lst_unseen(DATA_TRAIN, DATA_TEST)
+# Model.modeling_kd(data_pred,lst_unseen_result)
 
