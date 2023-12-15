@@ -47,7 +47,6 @@ parser.add_argument("-tr", "--trainfile", help="Specify the full path of the tra
 parser.add_argument("-te", "--testfile", help="Specify the full path of the file with TCR sequences")
 parser.add_argument("-sm", "--savemodel", help="Specify save model file")
 parser.add_argument("-o", "--outfile", default=sys.stdout, help="Specify output file")
-# parser.add_argument("-sm", "--savemodel", help="Specify the full path of the file with save model")
 
 args = parser.parse_args()
 
@@ -55,14 +54,11 @@ args = parser.parse_args()
 
 print("###---LOADING DATA")
 
-DATA_TRAIN = pd.read_csv(args.trainfile)
-DATA_TEST = pd.read_csv(args.testfile)
+DATA_TRAIN = pd.read_parquet(args.trainfile)
+DATA_TEST = pd.read_parquet(args.testfile)
 
 DATA_TRAIN = DATA_TRAIN[["CDR3b", "epitope", "binder"]]
 DATA_TEST = DATA_TEST[["CDR3b", "epitope", "binder"]]
-
-# DATA_TRAIN = pd.read_csv("./DATA_FINAL/DATA_TRAIN.csv")
-# DATA_TEST = pd.read_csv("./DATA_FINAL/DATA_TEST_v2.csv")
 
 ###--DATA_REPRESENTATION
 print("###---DATA REPRESENTATION")
@@ -75,7 +71,6 @@ X_TEST, y_TEST = Processor.DATA_REPRESENTATION(DATA_TEST),  DATA_TEST[["binder"]
 
 X_TRAIN_cv, y_TRAIN_cv = Processor.cv_data_kd(X_TRAIN), np.squeeze(np.array(y_TRAIN))
 X_TEST_cv, y_TEST_cv = Processor.cv_data_kd(X_TEST), np.squeeze(np.array(y_TEST))
-
 
 ###--TRAINING
 
@@ -129,7 +124,6 @@ test_labels_binary = y_TEST_cv.copy()
 teacher.fit(X_TRAIN_cv, train_labels_binary, epochs=5)
 teacher.evaluate(X_TEST_cv, test_labels_binary)
 
-
 # Initialize and compile distiller
 distiller = KD.Distiller(student=student, teacher=teacher)
 distiller.compile(
@@ -168,7 +162,6 @@ student_scratch.evaluate(X_TEST_cv, test_labels_binary)
 
 # student_scratch.save("model.h5")
 student_scratch.save(args.savemodel)
-# student_scratch = load_model("model.h5")
 
 ###---Evaluation
 print("###---EVALUATION")
@@ -180,8 +173,5 @@ df_label = pd.DataFrame(zip(predicted_probabilities.squeeze(), predicted_labels.
 data_pred = pd.concat([DATA_TEST, df_label], axis=1)
 
 print("###---SAVE DATA")
-data_pred.to_csv(args.outfile, index=False)
-
-# lst_unseen_result, l_lst_unseen = Processor.fn_lst_unseen(DATA_TRAIN, DATA_TEST)
-# Model.modeling_kd(data_pred,lst_unseen_result)
-
+# data_pred.to_csv(args.outfile, index=False)
+data_pred.to_parquet(args.outfile)
