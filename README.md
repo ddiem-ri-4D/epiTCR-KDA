@@ -30,7 +30,7 @@ source activate kda
 + If they are already complete, proceed to step 4.
 + If not, run the 3D structure using [OmegaFold](https://github.com/HeliXonProtein/OmegaFold) and add the structure to the [PDB folders](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/3DS_PDBFiles), following the steps below:
 
-### 3.1 Run OmegaFold
+#### 3.1 Run OmegaFold
 - Prepare a FASTA file containing the TCR/peptide sequences to run OmegaFold, see an example [here](https://github.com/ddiem-ri-4D/epiTCR-KDA/blob/main/datasets/DATA_4RUN/INPUT_FILE.fasta).
 - Refer to the OmegaFold running steps [here](https://github.com/HeliXonProtein/OmegaFold), and place the output into the [PDB files](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/3DS_PDBFiles) directory.
 - Double-check for any TCR/peptides that might still lack a structure. If all structures are present, proceed to step 3.2.
@@ -41,7 +41,7 @@ cd utils
 python3 checkHavePDB.py 
 ```
 
-### 3.2 Run Biopython
+#### 3.2 Run Biopython
 - After obtaining the 3D structure, run [Biopython](https://biopython.org/docs/dev/api/Bio.PDB.internal_coords.html) to retrieve Dihedral Angles information, resulting in an output *.tsv file.
 
 ```bash
