@@ -25,12 +25,15 @@ source activate kda
 - Obtain weights for TCR and peptides from `models` folder.
 
 ### 3. Check if TCR/pep sequences are present in the PDB folders.
-- If the structure already exists, proceed to step 4.
-- If not, run the 3D structure using [OmegaFold](https://github.com/HeliXonProtein/OmegaFold) and add the executed structure to the PDB folders, following these steps:
+- Prepare a list containing unique TCR/peptides from the data for training/testing.
+- Check if the unique TCR/peptides are already present in the PDB folders or not:
++ If they are already complete, proceed to step 4.
++ If not, run the 3D structure using [OmegaFold](https://github.com/HeliXonProtein/OmegaFold) and add the structure to the [PDB folders](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/3DS_PDBFiles), following the steps below:
 
 ### 3.1 Run OmegaFold
-
-- Prepare a list containing the TCR/peptides for 3D structure modeling.
+- Prepare a FASTA file containing the TCR/peptide sequences to run OmegaFold, see an example [here](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/3DS_PDBFiles/INPUT_FILE.fasta).
+- Refer to the OmegaFold running steps [here](https://github.com/HeliXonProtein/OmegaFold), and place the output into the [PDB files](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/3DS_PDBFiles) directory.
+- Double-check for any TCR/peptides that might still lack a structure. If all structures are present, proceed to step 3.2.
 - Run OmegaFold by executing the following command:
 
 ```bash
@@ -39,8 +42,7 @@ python3 checkHavePDB.py
 ```
 
 ### 3.2 Run Biopython
-
-- After obtaining the 3D structure, run Biopython to retrieve Dihedral Angles information, resulting in an output *tsv file.
+- After obtaining the 3D structure, run Biopython to retrieve Dihedral Angles information, resulting in an output *.tsv file.
 
 ```bash
 python3 PDB2DA.py
