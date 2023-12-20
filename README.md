@@ -15,7 +15,7 @@ This repository contains the code and the data to train [epiTCR-KDA](https://git
 ```bash
 git clone https://github.com/ddiem-ri-4D/epiTCR-KDA
 cd epiTCR-KDA/
-conda create --name kda python=3.6.13
+conda create --name kda python=3.6.8
 pip3 install pandas==2.0.3 tensorflow==2.13.0 keras==2.13.1 scikit-learn==1.1.2
 source activate kda
 ```
@@ -42,7 +42,7 @@ python3 checkHavePDB.py
 ```
 
 ### 3.2 Run Biopython
-- After obtaining the 3D structure, run Biopython to retrieve Dihedral Angles information, resulting in an output *.tsv file.
+- After obtaining the 3D structure, run [Biopython](https://biopython.org/docs/dev/api/Bio.PDB.internal_coords.html) to retrieve Dihedral Angles information, resulting in an output *.tsv file.
 
 ```bash
 python3 PDB2DA.py
