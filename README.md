@@ -21,8 +21,8 @@ source activate kda
 ```
 
 ### 2. Prepare TCR-peptide pairs for training and testing
-- Download training and testing data from `datasets` folder.
-- Obtain weights for TCR and peptides from `models` folder.
+- Download training and testing data from [`datasets`](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets) folder.
+- Obtain weights for TCR and peptides from [`models`](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/models) folder.
 
 ### 3. Check if TCR/pep sequences are present in the PDB folders.
 - Prepare a list containing unique TCR/peptides from the data for training/testing.
@@ -31,7 +31,7 @@ source activate kda
 + If not, run the 3D structure using [OmegaFold](https://github.com/HeliXonProtein/OmegaFold) and add the structure to the [PDB folders](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/3DS_PDBFiles), following the steps below:
 
 ### 3.1 Run OmegaFold
-- Prepare a FASTA file containing the TCR/peptide sequences to run OmegaFold, see an example [here](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/3DS_PDBFiles/INPUT_FILE.fasta).
+- Prepare a FASTA file containing the TCR/peptide sequences to run OmegaFold, see an example [here](https://github.com/ddiem-ri-4D/epiTCR-KDA/blob/main/datasets/DATA_4RUN/INPUT_FILE.fasta).
 - Refer to the OmegaFold running steps [here](https://github.com/HeliXonProtein/OmegaFold), and place the output into the [PDB files](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/3DS_PDBFiles) directory.
 - Double-check for any TCR/peptides that might still lack a structure. If all structures are present, proceed to step 3.2.
 - Run OmegaFold by executing the following command:
