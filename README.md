@@ -43,6 +43,7 @@ python3 checkHavePDB.py
 
 #### 3.2 Run Biopython
 - After obtaining the 3D structure, run [Biopython](https://biopython.org/docs/dev/api/Bio.PDB.internal_coords.html) to retrieve Dihedral Angles information, resulting in an output *.tsv file.
+- The output *.tsv files containing Dihedral Angles information are placed into the [DA folders](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/DA_TSVFiles) directory.
 
 ```bash
 python3 PDB2DA.py
