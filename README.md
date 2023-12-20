@@ -9,7 +9,7 @@ This repository contains the code and the data to train [epiTCR-KDA](https://git
 + Keras 2.6.0
 + TensorFlow 2.6.0
 
-## Steps to train a Binding Prediction model for TCR-peptide pairs
+## How to run epiTCR-KDA
 
 ### 1. Clone the repository
 ```bash
@@ -20,11 +20,11 @@ pip3 install pandas==2.0.3 tensorflow==2.13.0 keras==2.13.1 scikit-learn==1.1.2
 source activate kda
 ```
 
-### 2. How to run epiTCR-KDA
+### 2. Prepare data
 - Download training and testing data from [`datasets`](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets) folder.
 - Obtain weights for TCR and peptides from [`models`](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/models) folder.
 
-### 3. Check if TCR/pep sequences are present in the PDB folders.
+### 3. Check if TCR/pep sequences are present in the PDB folders
 - Prepare a list containing unique TCR/peptides from the data for training/testing.
 - Check if the unique TCR/peptides are already present in the PDB folders or not:
 + If they are already complete, proceed to step 4.
