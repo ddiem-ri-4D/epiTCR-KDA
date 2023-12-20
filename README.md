@@ -20,7 +20,7 @@ pip3 install pandas==2.0.3 tensorflow==2.13.0 keras==2.13.1 scikit-learn==1.1.2
 source activate kda
 ```
 
-### 2. Prepare TCR-peptide pairs for training and testing
+### 2. How to run epiTCR-KDA
 - Download training and testing data from [`datasets`](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets) folder.
 - Obtain weights for TCR and peptides from [`models`](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/models) folder.
 
