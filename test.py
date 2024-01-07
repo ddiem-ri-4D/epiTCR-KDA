@@ -11,7 +11,6 @@ import seaborn as sns
 from tqdm import tqdm
 import time
 import functools
-from imblearn.under_sampling import RandomUnderSampler
 
 from keras.models import load_model
 import sklearn.metrics as metrics
@@ -46,12 +45,12 @@ args = parser.parse_args()
 print("###---LOADING DATA")
 
 DATA_TEST = pd.read_parquet(args.testfile)
-DATA_TEST = DATA_TEST[["CDR3b", "epitope", "binder"]]
+DATA_TEST = DATA_TEST[["CDR3b", "epitope"]
 
 print("###---DATA REPRESENTATION")
 
-X_TEST, y_TEST = Processor.DATA_REPRESENTATION(DATA_TEST),  DATA_TEST[["binder"]]
-X_TEST_cv, y_TEST_cv = Processor.cv_data_kd(X_TEST), np.squeeze(np.array(y_TEST))
+X_TEST = Processor.DATA_REPRESENTATION(DATA_TEST)
+X_TEST_cv = Processor.cv_data_kd(X_TEST)
 
 # student_scratch.save("model.h5")
 # student_scratch.save(args.savedmodel)
