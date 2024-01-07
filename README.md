@@ -54,17 +54,17 @@ An example for training and testing
 
 ```bash
 python3 train.py 
-        --trainfile train.parquet \
-        --testfile test.parquet \
-        --savemodel savemodel.h5 \
-        --outfile predict.parquet
+        --trainfile ./datasets/DATA_4MODEL/TRAIN-TEST/train_2000peps.parquet \
+        --testfile ./datasets/DATA_4MODEL/TRAIN-TEST/test.parquet \
+        --savemodel ./models/model.h5 \
+        --outfile ./datasets/DATA_4PRED/prediction.parquet
 ```
 
 ```bash
 python3 test.py 
-        --testfile test.parquet \
-        --savedmodel savedmodel.h5 \
-        --outfile predict.parquet
+        --testfile ./datasets/DATA_4MODEL/TRAIN-TEST/test.parquet \
+        --savedmodel ./models/savedmodel.h5 \
+        --outfile ./datasets/DATA_4PRED/prediction.parquet
 ```
 
 ### 5. Contact
