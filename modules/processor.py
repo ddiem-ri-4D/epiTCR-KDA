@@ -1,29 +1,8 @@
 import pandas as pd
 import numpy as np
-import pickle
-import time
-import sys
 import os
-from keras.models import load_model
-
-import sklearn.metrics as metrics
-
 from imblearn.under_sampling import RandomUnderSampler
 
-from sklearn.model_selection import KFold
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import train_test_split
-from sklearn.pipeline import make_pipeline
-from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix
-from sklearn.model_selection import train_test_split, cross_validate, GridSearchCV
-from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, roc_auc_score, classification_report, roc_curve,auc, f1_score
-
-import matplotlib.pyplot as plt
-import seaborn as sns
-from tqdm import tqdm
-import time
-import functools
 
 
 def DATA_REPRESENTATION(DATA):
@@ -40,7 +19,6 @@ def DATA_REPRESENTATION(DATA):
            'E11', 'E12', 'E13', 'E14', 'E15', 'E16', 'E17', 'E18']]
     
     return DATA_TCRpep_SPLIT
-
 
 def getProteinByDiheral(list_seq, link):
     folder_path = link
@@ -111,8 +89,8 @@ def DAtoDataFrame(SAMPLE, SAMPLE_CDR3, SAMPLE_PEP):
 
     # Fill missing values with 0 for columns E1 to E18
     columns_to_fill_E = ['E' + str(i) for i in range(1, 19)]
-    SAMPLE_SPLIT_pep_merge[columns_to_fill_E] = SAMPLE_SPLIT_pep_merge[columns_to_fill_E].fillna(0)
     
+    SAMPLE_SPLIT_pep_merge[columns_to_fill_E] = SAMPLE_SPLIT_pep_merge[columns_to_fill_E].fillna(0)
     SAMPLE_SPLIT_TCRpep = SAMPLE_SPLIT_pep_merge.dropna(subset=['T1', 'E1']).copy()
     
     return SAMPLE_SPLIT_TCRpep
@@ -142,33 +120,20 @@ def fn_lst_unseen(data_train, data_test):
     return res, len(res)
 
 
-# def fn_reprocess_data(data):
-#     data.loc[data['predict_proba'] >= 0.85, 'predict_proba'] = data['predict_proba'] - 0.5
-#     data['predict_proba'].fillna(data['predict_proba'], inplace=True)
-#     data.loc[data['predict_proba'] >= 0.5, 'binder_pred'] = 1
-#     data.loc[data['predict_proba'] < 0.5, 'binder_pred'] = 0
-#
-#
-#     data.loc[data['predict_proba'] <= 0.15, 'predict_proba'] = data['predict_proba'] + 0.5
-#     data['predict_proba'].fillna(data['predict_proba'], inplace=True)
-#     data.loc[data['predict_proba'] >= 0.5, 'binder_pred'] = 1
-#     data.loc[data['predict_proba'] < 0.5, 'binder_pred'] = 0
-#
-#     return data
+def fn_reprocess_data(data):
+    data.loc[data['predict_proba'] >= 0.85, 'predict_proba'] = data['predict_proba'] - 0.5
+    data['predict_proba'].fillna(data['predict_proba'], inplace=True)  
+    data.loc[data['predict_proba'] >= 0.5, 'binder_pred'] = 1
+    data.loc[data['predict_proba'] < 0.5, 'binder_pred'] = 0
+    
 
-def check_length_full_b(df):
-    discard = ["\*", '_', '-', 'O', '1', 'y', 'l', 'X', '/', ' ', '#', '\(', '\?']
-    df = df[~df.CDR3b.str.contains('|'.join(discard))]
-    df = df[~df.epitope.str.contains('|'.join(discard))]
-    
-    df["len_epitope"] = df.epitope.str.len()
-    df = df[(df["len_epitope"] <= 11) & (df["len_epitope"] >= 8)]
-    df["len_cdr3"] = df.CDR3b.str.len()
-    df = df[(df["len_cdr3"] <= 19) & (df["len_cdr3"] >= 8)]
-    df = df.drop(['len_epitope', 'len_cdr3'], axis=1)
-    df = df.reset_index(drop=True)
-    
-    return df
+    data.loc[data['predict_proba'] <= 0.15, 'predict_proba'] = data['predict_proba'] + 0.5
+    data['predict_proba'].fillna(data['predict_proba'], inplace=True) 
+    data.loc[data['predict_proba'] >= 0.5, 'binder_pred'] = 1
+    data.loc[data['predict_proba'] < 0.5, 'binder_pred'] = 0
+
+    return data
+
 
 def check_length_epitope(df):
     discard = ["\*", '_', '-', 'O', '1', 'y', 'l', 'X', '/', ' ', '#', '\(', '\?']
@@ -179,18 +144,29 @@ def check_length_epitope(df):
     df = df.reset_index(drop=True)
     return df
 
+
 def process_sequence(sequence):
     if sequence.startswith('C') and sequence.endswith('F'):
         return sequence[1:-1] 
     else:
         return sequence  
     
-def check_length_tcr_v2(df):
+def check_length_tcr(df):
     discard = ["\*", '_', '-', 'O', '1', 'y', 'l', 'X', '/', ' ', '#', '\(', '\?']
     df = df[~df["CDR3b"].str.contains('|'.join(discard))]
     df["CDR3b"] = df["CDR3b"].apply(process_sequence)
     df["len_cdr3"] = df["CDR3b"].str.len()
     df = df[(df["len_cdr3"] <= 19) & (df["len_cdr3"] >= 8)]
     df = df.drop(['len_cdr3'], axis=1)
+    df = df.reset_index(drop=True)
+    return df
+
+def check_length_epi(df):
+    discard = ["\*", '_', '-', 'O', '1', 'y', 'l', 'X', '/', ' ', '#', '\(', '\?']
+    df = df[~df["epitope"].str.contains('|'.join(discard), na=False)]    
+    df["len_epi"] = df["epitope"].str.len()
+    df = df[(df["len_epi"] <= 11) & (df["len_epi"] >= 8)]
+    
+    df = df.drop(['len_epi'], axis=1)
     df = df.reset_index(drop=True)
     return df
