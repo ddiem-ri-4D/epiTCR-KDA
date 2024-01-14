@@ -1,11 +1,7 @@
 import numpy as np
 import sys
 import pandas as pd
-import random
-import glob
-import itertools
 import warnings
-import os
 import pandas as pd
 import numpy as np
 import modules.model as Model
@@ -14,25 +10,6 @@ from imblearn.under_sampling import RandomUnderSampler
 import sklearn.metrics as metrics
 from tensorflow import keras
 from tensorflow.keras import layers
-
-from keras.models import load_model
-from sklearn.model_selection import KFold
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import train_test_split
-from sklearn.svm import SVC
-from sklearn.pipeline import make_pipeline
-from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix
-from sklearn.model_selection import train_test_split, cross_validate, GridSearchCV
-from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.metrics import confusion_matrix,accuracy_score,precision_score,recall_score,roc_auc_score,classification_report,roc_curve,auc, f1_score
-from sklearn.metrics import classification_report
-
-import matplotlib.pyplot as plt
-import seaborn as sns
-from tqdm import tqdm
-import time
-import functools
-
 import modules.architectures as KD
 import modules.processor as Processor
 import modules.model as Model
@@ -51,14 +28,19 @@ parser.add_argument("-o", "--outfile", default=sys.stdout, help="Specify output 
 args = parser.parse_args()
 
 # print('Loading and encoding the dataset..')
-
 print("###---LOADING DATA")
 
 DATA_TRAIN = pd.read_parquet(args.trainfile)
 DATA_TEST = pd.read_parquet(args.testfile)
 
-DATA_TRAIN = DATA_TRAIN[["CDR3b", "epitope", "binder"]]
-DATA_TEST = DATA_TEST[["CDR3b", "epitope", "binder"]]
+# DATA_TRAIN = DATA_TRAIN[["CDR3b", "epitope", "binder"]]
+# DATA_TEST = DATA_TEST[["CDR3b", "epitope", "binder"]]
+
+DATA_TRAIN, DATA_TEST = Processor.check_length_tcr(DATA_TRAIN), Processor.check_length_tcr(DATA_TEST)
+DATA_TRAIN, DATA_TEST = Processor.check_length_epi(DATA_TRAIN), Processor.check_length_epi(DATA_TEST)
+DATA_TRAIN, DATA_TEST = DATA_TRAIN.reset_index(drop=True), DATA_TEST.reset_index(drop=True)
+
+
 
 ###--DATA_REPRESENTATION
 print("###---DATA REPRESENTATION")
@@ -71,6 +53,7 @@ X_TEST, y_TEST = Processor.DATA_REPRESENTATION(DATA_TEST),  DATA_TEST[["binder"]
 
 X_TRAIN_cv, y_TRAIN_cv = Processor.cv_data_kd(X_TRAIN), np.squeeze(np.array(y_TRAIN))
 X_TEST_cv, y_TEST_cv = Processor.cv_data_kd(X_TEST), np.squeeze(np.array(y_TEST))
+
 
 ###--TRAINING
 
@@ -124,6 +107,7 @@ test_labels_binary = y_TEST_cv.copy()
 teacher.fit(X_TRAIN_cv, train_labels_binary, epochs=5)
 teacher.evaluate(X_TEST_cv, test_labels_binary)
 
+
 # Initialize and compile distiller
 distiller = KD.Distiller(student=student, teacher=teacher)
 distiller.compile(
@@ -162,6 +146,7 @@ student_scratch.evaluate(X_TEST_cv, test_labels_binary)
 
 # student_scratch.save("model.h5")
 student_scratch.save(args.savemodel)
+# student_scratch = load_model("model.h5")
 
 ###---Evaluation
 print("###---EVALUATION")
@@ -175,3 +160,5 @@ data_pred = pd.concat([DATA_TEST, df_label], axis=1)
 print("###---SAVE DATA")
 # data_pred.to_csv(args.outfile, index=False)
 data_pred.to_parquet(args.outfile)
+
+
