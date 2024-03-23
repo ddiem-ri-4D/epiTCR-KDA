@@ -56,14 +56,14 @@ An example for training and testing
 python3 train.py \
         --trainfile ./datasets/DATA_4MODEL/TRAIN-TEST/train.parquet \
         --testfile ./datasets/DATA_4MODEL/TRAIN-TEST/test.parquet \
-        --savemodel ./models/model.h5 \
+        --savemodel ./models/KDA_model.h5 \
         --outfile ./datasets/DATA_4PRED/prediction.parquet
 ```
 
 ```bash
 python3 test.py \
         --testfile ./datasets/DATA_4MODEL/TRAIN-TEST/test.parquet \
-        --savedmodel ./models/savedmodel.h5 \
+        --savedmodel ./models/KDA_model.h5 \
         --outfile ./datasets/DATA_4PRED/prediction.parquet
 ```
 
