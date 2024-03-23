@@ -15,7 +15,6 @@ import modules.processor as Processor
 import modules.model as Model
 
 warnings.filterwarnings('ignore')
-
 from argparse import ArgumentParser
 
 #Args parse
@@ -40,8 +39,6 @@ DATA_TRAIN, DATA_TEST = Processor.check_length_tcr(DATA_TRAIN), Processor.check_
 DATA_TRAIN, DATA_TEST = Processor.check_length_epi(DATA_TRAIN), Processor.check_length_epi(DATA_TEST)
 DATA_TRAIN, DATA_TEST = DATA_TRAIN.reset_index(drop=True), DATA_TEST.reset_index(drop=True)
 
-
-
 ###--DATA_REPRESENTATION
 print("###---DATA REPRESENTATION")
 
@@ -56,7 +53,6 @@ X_TEST_cv, y_TEST_cv = Processor.cv_data_kd(X_TEST), np.squeeze(np.array(y_TEST)
 
 
 ###--TRAINING
-
 print("###---TRAINING")
 
 # Create the teacher
@@ -89,7 +85,6 @@ student = keras.Sequential(
 
 # Clone student for later comparison
 student_scratch = keras.models.clone_model(student)
-
 batch_size = 64
 
 # Train teacher as a binary classifier
@@ -158,7 +153,4 @@ df_label = pd.DataFrame(zip(predicted_probabilities.squeeze(), predicted_labels.
 data_pred = pd.concat([DATA_TEST, df_label], axis=1)
 
 print("###---SAVE DATA")
-# data_pred.to_csv(args.outfile, index=False)
 data_pred.to_parquet(args.outfile)
-
-
