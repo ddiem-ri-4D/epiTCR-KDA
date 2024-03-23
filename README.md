@@ -57,14 +57,14 @@ python3 train.py \
         --trainfile ./datasets/DATA_4MODEL/TRAIN-TEST/train.parquet \
         --testfile ./datasets/DATA_4MODEL/TRAIN-TEST/test.parquet \
         --savemodel ./models/KDA_model.h5 \
-        --outfile ./datasets/DATA_4PRED/prediction.parquet
+        --outfile ./datasets/DATA_4PRED/test_prediction.parquet
 ```
 
 ```bash
 python3 test.py \
         --testfile ./datasets/DATA_4MODEL/TRAIN-TEST/test.parquet \
         --savedmodel ./models/KDA_model.h5 \
-        --outfile ./datasets/DATA_4PRED/prediction.parquet
+        --outfile ./datasets/DATA_4PRED/test_prediction.parquet
 ```
 
 ### 5. Contact
