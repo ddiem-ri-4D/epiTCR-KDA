@@ -33,8 +33,7 @@ def ramachandran_type(phi, psi):
     else:
         return "Unknown"
 
-# folder_path = "/home/jovyan/work/data01/work/Diem/SM07/TCR-ML/PHASE2_MODEL/MODEL3D/DATA/FINAL_PEP"
-folder_path = "/home/jovyan/work/data01/work/Diem/SM07/TCR-ML/PHASE2_MODEL/MODEL3D/DATA/FINAL_CDR3"
+folder_path = "./datasets/DA_TSVFiles"
 file_extension = ".pdb"
 
 # Lấy danh sách các file trong thư mục FINAL_PEP/
@@ -42,9 +41,8 @@ file_list = [filename for filename in os.listdir(folder_path) if filename.endswi
 
 for pdb_file in file_list:
     pdb_code = os.path.splitext(pdb_file)[0]
-    link_code = "/home/jovyan/work/data01/work/Diem/SM07/TCR-ML/PHASE2_MODEL/DIHEDRAL/MODEL/DATA/PARSE_DIH_CDR3/" + pdb_code
-    # link_code = "/home/jovyan/work/data01/work/Diem/SM07/TCR-ML/PHASE2_MODEL/DIHEDRAL/MODEL/DATA/PARSE_DIH_PEP/" + pdb_code
-
+    link_code = "./datasets/3DS_PDBFiles" + pdb_code
+    
     print("About to load Bio.PDB and the PDB file...")
     structure = Bio.PDB.PDBParser().get_structure(pdb_code, os.path.join(folder_path, pdb_file))
     print("Done")
