@@ -30,7 +30,7 @@ source activate kda
 
 ```bash
 cd utils
-python3 checkHavePDB.py 
+python3 ./utils/checkHavePDB.py 
 ```
 
 + If they are already complete, proceed to step 4.
@@ -46,7 +46,7 @@ python3 checkHavePDB.py
 - The output *.tsv files containing Dihedral Angles information are placed into the [DA folders](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/DA_TSVFiles) directory.
 
 ```bash
-python3 PDB2DA.py
+python3 ./utils/PDB2DA.py
 ```
 
 ### 4. Retraining and predict model
