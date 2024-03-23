@@ -6,8 +6,8 @@ from imblearn.under_sampling import RandomUnderSampler
 
 
 def DATA_REPRESENTATION(DATA):
-    DATA_cdr3 = getProteinByDiheral(DATA.CDR3b.unique(), "/home/jovyan/work/data01/work/Diem/SM07/TCR-ML/PHASE2_MODEL/DIHEDRAL/MODEL/DATA/PARSE_DIH_CDR3/")
-    DATA_pep = getProteinByDiheral(DATA.epitope.unique(), "/home/jovyan/work/data01/work/Diem/SM07/TCR-ML/PHASE2_MODEL/DIHEDRAL/MODEL/DATA/PARSE_DIH_PEP/")
+    DATA_cdr3 = getProteinByDiheral(DATA.CDR3b.unique(), "./datasets/DA_TSVFiles/")
+    DATA_pep = getProteinByDiheral(DATA.epitope.unique(), "./datasets/DA_TSVFiles/")
 
     DATA_TCRpep = DAtoDataFrame(DATA, DATA_cdr3, DATA_pep)
 
