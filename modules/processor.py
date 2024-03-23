@@ -119,22 +119,6 @@ def fn_lst_unseen(data_train, data_test):
     res = [item for item in lst_pep_test if item not in lst_pep_train]
     return res, len(res)
 
-
-def fn_reprocess_data(data):
-    data.loc[data['predict_proba'] >= 0.85, 'predict_proba'] = data['predict_proba'] - 0.5
-    data['predict_proba'].fillna(data['predict_proba'], inplace=True)  
-    data.loc[data['predict_proba'] >= 0.5, 'binder_pred'] = 1
-    data.loc[data['predict_proba'] < 0.5, 'binder_pred'] = 0
-    
-
-    data.loc[data['predict_proba'] <= 0.15, 'predict_proba'] = data['predict_proba'] + 0.5
-    data['predict_proba'].fillna(data['predict_proba'], inplace=True) 
-    data.loc[data['predict_proba'] >= 0.5, 'binder_pred'] = 1
-    data.loc[data['predict_proba'] < 0.5, 'binder_pred'] = 0
-
-    return data
-
-
 def check_length_epitope(df):
     discard = ["\*", '_', '-', 'O', '1', 'y', 'l', 'X', '/', ' ', '#', '\(', '\?']
     df = df[~df.Antigen.str.contains('|'.join(discard))]
@@ -170,3 +154,4 @@ def check_length_epi(df):
     df = df.drop(['len_epi'], axis=1)
     df = df.reset_index(drop=True)
     return df
+ 
