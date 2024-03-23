@@ -1,7 +1,7 @@
 #Check have in PDB
 
 import os
-thu_muc_pep =  '/home/jovyan/work/data01/work/Diem/SM07/TCR-ML/PHASE2_MODEL/MODEL3D/DATA/FINAL_CDR3'
+thu_muc_pep =  './datasets/DA_TSVFiles'
 
 def read2seq(LST_SEQ, thu_muc):
     danh_sach_tep_tsv = []
