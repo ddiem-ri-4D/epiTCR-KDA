@@ -86,19 +86,19 @@ def check_false_pos_neg(model_test, test, pX_test, py_test):
 
 def modeling_kd(data_test, lst_unseen):
     FILTER_METRIC = data_test.copy()
-    FILTER_METRIC.to_csv("./PREDICTION/KD_PREDICTION_Universal_v2_Overral.csv", index=False)
+    # FILTER_METRIC.to_csv("./PREDICTION/KD_PREDICTION_Universal_v2_Overral.csv", index=False)
     lst_unseen = lst_unseen
     lst_dominant = ["GLCTLVAML", "NLVPMVATV", "GILGFVFTL", "TPRVTGGGAM", "ELAGIGILTV", "AVFDRKSDAK", "KLGGALQAK"]
     
     seen_data = FILTER_METRIC[~FILTER_METRIC.epitope.isin(lst_unseen)]
-    seen_data.to_csv("./PREDICTION/KD_PREDICTION_Universal_v2_Seen.csv", index=False)
+    # seen_data.to_csv("./PREDICTION/KD_PREDICTION_Universal_v2_Seen.csv", index=False)
     unseen_data = FILTER_METRIC[FILTER_METRIC.epitope.isin(lst_unseen)]
-    unseen_data.to_csv("./PREDICTION/KD_PREDICTION_Universal_v2_Unseen.csv", index=False)
+    # unseen_data.to_csv("./PREDICTION/KD_PREDICTION_Universal_v2_Unseen.csv", index=False)
     
     dominant_data = FILTER_METRIC[FILTER_METRIC.epitope.isin(lst_dominant)]
-    dominant_data.to_csv("./PREDICTION/KD_PREDICTION_Universal_v2_Dominant.csv", index=False)
+    # dominant_data.to_csv("./PREDICTION/KD_PREDICTION_Universal_v2_Dominant.csv", index=False)
     nondominant_data = FILTER_METRIC[~FILTER_METRIC.epitope.isin(lst_dominant)]
-    nondominant_data.to_csv("./PREDICTION/KD_PREDICTION_Universal_v2_NoDominant.csv", index=False)
+    # nondominant_data.to_csv("./PREDICTION/KD_PREDICTION_Universal_v2_NoDominant.csv", index=False)
     
     data_visu(FILTER_METRIC)
     data_visu(seen_data)
@@ -150,5 +150,3 @@ def data_visu(data):
     print('Specificity (TNR): ', round(specificity, 3))
 
     _rocAuc(y_test, data["proba_pred"])
-    
-    
