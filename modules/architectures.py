@@ -156,8 +156,6 @@ class Distiller(keras.Model):
     
     
     def attention_based_feature_distillation(self, teacher_features, student_features):
-        # Tính toán attention-based feature distillation loss
-
         # Tính toán sự tương đồng giữa các đặc trưng của giáo viên và học sinh
         similarity_matrix = self.calculate_similarity(teacher_features, student_features)
 
@@ -167,8 +165,6 @@ class Distiller(keras.Model):
         return afd_loss
 
     def calculate_similarity(self, teacher_features, student_features):
-        # Tính toán similarity scores giữa các đặc trưng của giáo viên và học sinh
-        # Ở đây có thể sử dụng các phương pháp như cosine similarity, dot product, etc.
         # Cosine similarity
         teacher_normalized = tf.nn.l2_normalize(teacher_features, axis=1)
         student_normalized = tf.nn.l2_normalize(student_features, axis=1)
@@ -177,8 +173,6 @@ class Distiller(keras.Model):
         return similarity_matrix
 
     def compute_afd_loss(self, similarity_matrix):
-        # Tính toán AFD loss dựa trên similarity matrix của teacher và student features
-        
         # Mean squared error giữa similarity matrix
         afd_loss = tf.reduce_mean(tf.square(similarity_matrix))
         
