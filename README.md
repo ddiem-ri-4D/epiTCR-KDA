@@ -10,6 +10,7 @@ This repository contains the code and the data to train [epiTCR-KDA](https://git
 + TensorFlow 2.6.0
 
 ## How to run epiTCR-KDA
+![pipeline]([assets/my-logo.svg](https://github.com/ddiem-ri-4D/epiTCR-KDA/blob/main/assets/Figure1_cut.png))
 
 ### 1. Clone the repository
 ```bash
