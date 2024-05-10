@@ -48,7 +48,7 @@ python3 checkHavePDB.py
 
 ```bash
 cd utils
-python3 ./utils/PDB2DA.py
+python3 PDB2DA.py
 ```
 
 ### 4. Retraining and predict model
