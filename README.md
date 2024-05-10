@@ -25,7 +25,7 @@ source activate kda
 - Download training and testing data from [`datasets`](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/DATA_4MODEL) folder.
 - Download the 3D structure and dihedral angles of TCR and peptide from folders [`3DS_PDBFiles`](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/3DS_PDBFiles) and [`DA_TSVFiles`](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/DA_TSVFiles).
 
-### 3. Check if TCR/pep sequences are present in the PDB folders
+### 3. Check if TCR/pep sequences are present in the DA_TSVFiles folders
 - Prepare a list containing unique TCR/peptides from the data for training/testing.
 - Check if the unique TCR/peptides are already present in the PDB folders or not by executing the following command:
 
