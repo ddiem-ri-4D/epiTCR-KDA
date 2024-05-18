@@ -34,37 +34,6 @@ from biopandas.pdb import PandasPdb
 from tensorflow import keras
 from tensorflow.keras import layers
 
-
-# def AFD(self, teacher_features, student_features):
-#     # Calculate queries and keys using global average pooling
-#     query_teacher = tf.reduce_mean(teacher_features, axis=[1, 2])  # Assuming height and width axes are 1 and 2
-#     key_student = tf.reduce_mean(student_features, axis=[1, 2])
-
-#     # Calculate attention scores
-#     attention_scores = calculate_attention(query_teacher, key_student)
-
-#     # Compute distillation loss based on attention scores
-#     distillation_loss = self.distillation_loss_fn(
-#         teacher_features, student_features, attention_scores)
-
-#     return distillation_loss
-
-
-# def attention_based_feature_distillation_loss(teacher_features, student_features):
-#     # Normalize features
-#     teacher_features = tf.nn.l2_normalize(teacher_features, axis=-1)
-#     student_features = tf.nn.l2_normalize(student_features, axis=-1)
-
-#     # Calculate cosine similarity between teacher and student features
-#     similarity = tf.keras.losses.CosineSimilarity(axis=-1)
-#     similarity_scores = similarity(teacher_features, student_features)
-
-#     # Compute the mean of similarity scores as the distillation loss
-#     distillation_loss = 1 - tf.reduce_mean(similarity_scores)
-
-#     return distillation_loss
-
-
 # Create the Distiller class
 class Distiller(keras.Model):
     def __init__(self, student, teacher):
