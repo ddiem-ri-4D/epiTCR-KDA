@@ -84,27 +84,22 @@ def check_false_pos_neg(model_test, test, pX_test, py_test):
     return false_pos_neg_loc
 
 
-def modeling_kd(data_test, lst_unseen):
-    FILTER_METRIC = data_test.copy()
-    # FILTER_METRIC.to_csv("./PREDICTION/KD_PREDICTION_Universal_v2_Overral.csv", index=False)
-    lst_unseen = lst_unseen
-    lst_dominant = ["GLCTLVAML", "NLVPMVATV", "GILGFVFTL", "TPRVTGGGAM", "ELAGIGILTV", "AVFDRKSDAK", "KLGGALQAK"]
+# def modeling_kd(data_test, lst_unseen):
+#     FILTER_METRIC = data_test.copy()
+#     lst_unseen = lst_unseen
+#     lst_dominant = ["GLCTLVAML", "NLVPMVATV", "GILGFVFTL", "TPRVTGGGAM", "ELAGIGILTV", "AVFDRKSDAK", "KLGGALQAK"]
     
-    seen_data = FILTER_METRIC[~FILTER_METRIC.epitope.isin(lst_unseen)]
-    # seen_data.to_csv("./PREDICTION/KD_PREDICTION_Universal_v2_Seen.csv", index=False)
-    unseen_data = FILTER_METRIC[FILTER_METRIC.epitope.isin(lst_unseen)]
-    # unseen_data.to_csv("./PREDICTION/KD_PREDICTION_Universal_v2_Unseen.csv", index=False)
+#     seen_data = FILTER_METRIC[~FILTER_METRIC.epitope.isin(lst_unseen)]
+#     unseen_data = FILTER_METRIC[FILTER_METRIC.epitope.isin(lst_unseen)]
     
-    dominant_data = FILTER_METRIC[FILTER_METRIC.epitope.isin(lst_dominant)]
-    # dominant_data.to_csv("./PREDICTION/KD_PREDICTION_Universal_v2_Dominant.csv", index=False)
-    nondominant_data = FILTER_METRIC[~FILTER_METRIC.epitope.isin(lst_dominant)]
-    # nondominant_data.to_csv("./PREDICTION/KD_PREDICTION_Universal_v2_NoDominant.csv", index=False)
+#     dominant_data = FILTER_METRIC[FILTER_METRIC.epitope.isin(lst_dominant)]
+#     nondominant_data = FILTER_METRIC[~FILTER_METRIC.epitope.isin(lst_dominant)]
     
-    data_visu(FILTER_METRIC)
-    data_visu(seen_data)
-    data_visu(unseen_data)
-    data_visu(dominant_data)
-    data_visu(nondominant_data)
+#     data_visu(FILTER_METRIC)
+#     data_visu(seen_data)
+#     data_visu(unseen_data)
+#     data_visu(dominant_data)
+#     data_visu(nondominant_data)
     
 def fn_lst_unseen(data_train, data_test):
     lst_pep_train = data_train.epitope.unique().tolist()
