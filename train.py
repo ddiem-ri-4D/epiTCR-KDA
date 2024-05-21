@@ -32,9 +32,6 @@ print("###---LOADING DATA")
 DATA_TRAIN = pd.read_parquet(args.trainfile)
 DATA_TEST = pd.read_parquet(args.testfile)
 
-# DATA_TRAIN = DATA_TRAIN[["CDR3b", "epitope", "binder"]]
-# DATA_TEST = DATA_TEST[["CDR3b", "epitope", "binder"]]
-
 DATA_TRAIN, DATA_TEST = Processor.check_length_tcr(DATA_TRAIN), Processor.check_length_tcr(DATA_TEST)
 DATA_TRAIN, DATA_TEST = Processor.check_length_epi(DATA_TRAIN), Processor.check_length_epi(DATA_TEST)
 DATA_TRAIN, DATA_TEST = DATA_TRAIN.reset_index(drop=True), DATA_TEST.reset_index(drop=True)
@@ -64,7 +61,7 @@ teacher = keras.Sequential(
         layers.MaxPooling2D(pool_size=(2, 2), strides=(1, 1), padding="same"),
         layers.Conv2D(256, (3, 3), strides=(2, 2), padding="same"),
         layers.Flatten(),
-        layers.Dense(1, activation="sigmoid"),  # Binary classification with sigmoid activation
+        layers.Dense(1, activation="sigmoid"),  
     ],
     name="teacher",
 )
@@ -78,12 +75,11 @@ student = keras.Sequential(
         layers.MaxPooling2D(pool_size=(2, 2), strides=(1, 1), padding="same"),
         layers.Conv2D(32, (3, 3), strides=(2, 2), padding="same"),
         layers.Flatten(),
-        layers.Dense(1, activation="sigmoid"),  # Binary classification with sigmoid activation
+        layers.Dense(1, activation="sigmoid"),  
     ],
     name="student",
 )
 
-# Clone student for later comparison
 student_scratch = keras.models.clone_model(student)
 batch_size = 64
 
@@ -101,7 +97,6 @@ test_labels_binary = y_TEST_cv.copy()
 # Train and evaluate teacher on data
 teacher.fit(X_TRAIN_cv, train_labels_binary, epochs=5)
 teacher.evaluate(X_TEST_cv, test_labels_binary)
-
 
 # Initialize and compile distiller
 distiller = KD.Distiller(student=student, teacher=teacher)
@@ -139,9 +134,7 @@ test_labels_binary = y_TEST_cv.copy()
 student_scratch.fit(X_TRAIN_cv, train_labels_binary, epochs=3)
 student_scratch.evaluate(X_TEST_cv, test_labels_binary)
 
-# student_scratch.save("model.h5")
 student_scratch.save(args.savemodel)
-# student_scratch = load_model("model.h5")
 
 ###---Evaluation
 print("###---EVALUATION")
