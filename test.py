@@ -29,7 +29,6 @@ print("###---LOADING DATA")
 DATA_TEST = pd.read_parquet(args.testfile)
 DATA_TEST = pd.read_parquet(args.testfile)
 
-# DATA_TEST = DATA_TEST[["CDR3b", "epitope", "binder"]]
 DATA_TEST = Processor.check_length_tcr(DATA_TEST)
 DATA_TEST = Processor.check_length_epi(DATA_TEST)
 DATA_TEST = DATA_TEST.reset_index(drop=True)
@@ -41,8 +40,6 @@ X_TEST = Processor.DATA_REPRESENTATION(DATA_TEST)
 X_TEST_cv = Processor.cv_data_kd(X_TEST)
 
 ###--LOAD MODEL PRETRAINING
-# student_scratch.save("model.h5")
-# student_scratch.save(args.savedmodel)
 student_scratch = load_model(args.savedmodel)
 
 ###---Evaluation
