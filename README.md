@@ -75,7 +75,15 @@ For more questions or feedback, please simply post an [Issue](https://github.com
 ### 6. Citation
 Please cite this paper if it helps your research:
 ```bibtex
-epiTCR-KDA: Knowledge Distillation model on Dihedral Angles for TCR-peptide prediction
-My-Diem Nguyen Pham, Chinh Tran-To Su, Thanh-Nhan Nguyen, Hoai-Nghia Nguyen, Dinh Duy An Nguyen, Hoa Giang, Dinh-Thuc Nguyen, Minh-Duy Phan, Vy Nguyen
-bioRxiv 2024.05.18.594806; doi: https://doi.org/10.1101/2024.05.18.594806
+@article {Pham2024.05.18.594806,
+	author = {Pham, My-Diem Nguyen and Su, Chinh Tran-To and Nguyen, Thanh-Nhan and Nguyen, Hoai-Nghia and Nguyen, Dinh Duy An and Giang, Hoa and Nguyen, Dinh-Thuc and Phan, Minh-Duy and Nguyen, Vy},
+	title = {epiTCR-KDA: Knowledge Distillation model on Dihedral Angles for TCR-peptide prediction},
+	elocation-id = {2024.05.18.594806},
+	year = {2024},
+	doi = {10.1101/2024.05.18.594806},
+	publisher = {Cold Spring Harbor Laboratory},
+	URL = {https://www.biorxiv.org/content/early/2024/05/21/2024.05.18.594806},
+	eprint = {https://www.biorxiv.org/content/early/2024/05/21/2024.05.18.594806.full.pdf},
+	journal = {bioRxiv}
+}
 ```
