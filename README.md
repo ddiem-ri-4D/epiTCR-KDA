@@ -84,6 +84,5 @@ Please cite this paper if it helps your research:
 	publisher = {Cold Spring Harbor Laboratory},
 	URL = {https://www.biorxiv.org/content/early/2024/05/21/2024.05.18.594806},
 	eprint = {https://www.biorxiv.org/content/early/2024/05/21/2024.05.18.594806.full.pdf},
-	journal = {bioRxiv}
-}
+	journal = {bioRxiv}}
 ```
