@@ -74,3 +74,8 @@ For more questions or feedback, please simply post an [Issue](https://github.com
 
 ### 6. Citation
 Please cite this paper if it helps your research:
+```bibtex
+epiTCR-KDA: Knowledge Distillation model on Dihedral Angles for TCR-peptide prediction
+My-Diem Nguyen Pham, Chinh Tran-To Su, Thanh-Nhan Nguyen, Hoai-Nghia Nguyen, Dinh Duy An Nguyen, Hoa Giang, Dinh-Thuc Nguyen, Minh-Duy Phan, Vy Nguyen
+bioRxiv 2024.05.18.594806; doi: https://doi.org/10.1101/2024.05.18.594806
+```
