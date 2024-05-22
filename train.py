@@ -6,7 +6,6 @@ import pandas as pd
 import numpy as np
 import modules.model as Model
 from imblearn.under_sampling import RandomUnderSampler
-
 import sklearn.metrics as metrics
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -25,7 +24,6 @@ parser.add_argument("-sm", "--savemodel", help="Specify save model file")
 parser.add_argument("-o", "--outfile", default=sys.stdout, help="Specify output file")
 
 args = parser.parse_args()
-
 # print('Loading and encoding the dataset..')
 print("###---LOADING DATA")
 
@@ -42,12 +40,9 @@ print("###---DATA REPRESENTATION")
 DATA_TCRpep_SPLIT = Processor.DATA_REPRESENTATION(DATA_TRAIN)
 DATA_TRAIN_FULL = pd.concat([DATA_TRAIN, DATA_TCRpep_SPLIT], axis=1)
 X_TRAIN, y_TRAIN = Processor.fn_downsampling(DATA_TRAIN_FULL)
-
 X_TEST, y_TEST = Processor.DATA_REPRESENTATION(DATA_TEST),  DATA_TEST[["binder"]]
-
 X_TRAIN_cv, y_TRAIN_cv = Processor.cv_data_kd(X_TRAIN), np.squeeze(np.array(y_TRAIN))
 X_TEST_cv, y_TEST_cv = Processor.cv_data_kd(X_TEST), np.squeeze(np.array(y_TEST))
-
 
 ###--TRAINING
 print("###---TRAINING")
@@ -133,7 +128,6 @@ test_labels_binary = y_TEST_cv.copy()
 # Train and evaluate student trained from scratch.
 student_scratch.fit(X_TRAIN_cv, train_labels_binary, epochs=3)
 student_scratch.evaluate(X_TEST_cv, test_labels_binary)
-
 student_scratch.save(args.savemodel)
 
 ###---Evaluation
