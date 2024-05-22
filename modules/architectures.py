@@ -81,12 +81,6 @@ class Distiller(keras.Model):
             # Calculate attention-based feature distillation loss
             afd_loss = self.attention_based_feature_distillation(teacher_predictions, student_predictions)
             loss = (1 - self.alpha) * student_loss + self.alpha * distillation_loss + self.beta * afd_loss
-            
-            #  # Calculate attention-based feature distillation loss
-            # afd_loss = self.attention_based_feature_distillation(x, teacher_predictions, student_predictions)
-            
-            # Compute the total loss
-            # loss = (1 - self.alpha) * student_loss + self.alpha * distillation_loss
 
         # Compute the gradients
         trainable_vars = self.student.trainable_variables
@@ -123,12 +117,8 @@ class Distiller(keras.Model):
         results.update({"student_loss": student_loss})
         return results
     
-    
     def attention_based_feature_distillation(self, teacher_features, student_features):
-        # Tính toán sự tương đồng giữa các đặc trưng của giáo viên và học sinh
         similarity_matrix = self.calculate_similarity(teacher_features, student_features)
-
-        # Tính toán loss dựa trên similarity matrix
         afd_loss = self.compute_afd_loss(similarity_matrix)
         
         return afd_loss
@@ -146,4 +136,3 @@ class Distiller(keras.Model):
         afd_loss = tf.reduce_mean(tf.square(similarity_matrix))
         
         return afd_loss
-    
