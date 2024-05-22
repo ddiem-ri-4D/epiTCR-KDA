@@ -83,7 +83,6 @@ def check_false_pos_neg(model_test, test, pX_test, py_test):
 
     return false_pos_neg_loc
 
-
 # def modeling_kd(data_test, lst_unseen):
 #     FILTER_METRIC = data_test.copy()
 #     lst_unseen = lst_unseen
@@ -101,7 +100,6 @@ def fn_lst_unseen(data_train, data_test):
     
     res = [item for item in lst_pep_test if item not in lst_pep_train]
     return res, len(res)
-
 
 def _rocAuc(y_true, y_score):
     y_pred01_proba = y_score.to_numpy()
