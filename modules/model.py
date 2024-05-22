@@ -84,13 +84,12 @@ def check_false_pos_neg(model_test, test, pX_test, py_test):
     return false_pos_neg_loc
 
 # def modeling_kd(data_test, lst_unseen):
-#     FILTER_METRIC = data_test.copy()
 #     lst_unseen = lst_unseen
 
-#     seen_data = FILTER_METRIC[~FILTER_METRIC.epitope.isin(lst_unseen)]
-#     unseen_data = FILTER_METRIC[FILTER_METRIC.epitope.isin(lst_unseen)]
+#     seen_data = data_test[~data_test.epitope.isin(lst_unseen)]
+#     unseen_data = data_test[data_test.epitope.isin(lst_unseen)]
 
-#     data_visu(FILTER_METRIC)
+#     data_visu(data_test)
 #     data_visu(seen_data)
 #     data_visu(unseen_data)
     
