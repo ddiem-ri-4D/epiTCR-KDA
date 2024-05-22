@@ -3,20 +3,12 @@ import numpy as np
 import os
 from imblearn.under_sampling import RandomUnderSampler
 
-
-
 def DATA_REPRESENTATION(DATA):
     DATA_cdr3 = getProteinByDiheral(DATA.CDR3b.unique(), "./datasets/DA_TSVFiles/")
     DATA_pep = getProteinByDiheral(DATA.epitope.unique(), "./datasets/DA_TSVFiles/")
 
     DATA_TCRpep = DAtoDataFrame(DATA, DATA_cdr3, DATA_pep)
-
-    DATA_TCRpep_SPLIT = DATA_TCRpep[['T1', 'T2',
-           'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12', 'T13',
-           'T14', 'T15', 'T16', 'T17', 'T18', 'T19', 'T20', 'T21', 'T22', 'T23',
-           'T24', 'T25', 'T26', 'T27', 'T28', 'T29', 'T30', 'T31', 'T32', 'T33',
-           'T34', 'E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7', 'E8', 'E9', 'E10',
-           'E11', 'E12', 'E13', 'E14', 'E15', 'E16', 'E17', 'E18']]
+    DATA_TCRpep_SPLIT = DATA_TCRpep[[f'T{i}' for i in range(1, 35)] + [f'E{i}' for i in range(1, 19)]]
     
     return DATA_TCRpep_SPLIT
 
@@ -51,7 +43,6 @@ def fn_downsampling(data):
     return X_res, y_res
 
 def cvVectorDict2DFTCR(vector, num_columns=34):
-    # Loại bỏ giá trị None khỏi vector
     vector = {key: value for key, value in vector.items() if value is not None}
     
     temp = pd.DataFrame.from_dict(vector, orient='index')
@@ -128,7 +119,6 @@ def check_length_epitope(df):
     df = df.reset_index(drop=True)
     return df
 
-
 def process_sequence(sequence):
     if sequence.startswith('C') and sequence.endswith('F'):
         return sequence[1:-1] 
@@ -154,4 +144,3 @@ def check_length_epi(df):
     df = df.drop(['len_epi'], axis=1)
     df = df.reset_index(drop=True)
     return df
- 
