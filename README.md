@@ -30,7 +30,7 @@ source activate kda
 
 ```bash
 cd utils
-python3 checkHavePDB.py 
+python3 check3DSDA.py 
 ```
 
 + If they are already complete, proceed to step 4.
