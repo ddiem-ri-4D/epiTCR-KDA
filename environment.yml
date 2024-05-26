@@ -1,0 +1,21 @@
+name: kda
+channels: 
+  - conda-forge
+dependencies:
+  - python=3.6.8
+  - tensorflow
+  - bio                          
+  - biopandas                    
+  - biopython                    
+  - conda                        
+  - keras                        
+  - numpy                        
+  - pandas                       
+  - plotly                                               
+  - scipy                        
+  - scikit-learn
+	- pip
+	  - tqdm 
+		- sklearn 
+	  - imbalanced-learn             
+		               
