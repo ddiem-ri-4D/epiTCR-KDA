@@ -1,7 +1,7 @@
 # epiTCR-KDA: Knowledge Distillation model on Dihedral Angles for TCR-peptide prediction
 
 
-This repository contains the code and the data to train [epiTCR-KDA](https://github.com/ddiem-ri-4D/epiTCR-KDA) model.
+This repository contains the code and the data to train [epiTCR-KDA](https://www.biorxiv.org/content/10.1101/2024.05.18.594806v1) model.
 
 ## Requirements
 
