@@ -52,7 +52,7 @@ python3 PDB2DA.py
 ```
 
 ### 4. Retraining and predict model
-`train.parquet`/`test.parquet`: input parquet file with 3 columns named as "CDR3b, epitope, binder (if training)": TCR-beta CDR3 sequence, peptide sequence, and binder.
+`train.parquet`/`test.parquet`: input parquet file with 3 columns named as "CDR3b, epitope, binder (if training)": TCR-beta CDR3 sequence, peptide sequence, and CDR3b and peptide bind together or not.
 An example for training and testing
 
 | CDR3b         | epitope       | binder|
