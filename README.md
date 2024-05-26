@@ -16,8 +16,7 @@ This repository contains the code and the data to train [epiTCR-KDA](https://www
 ```bash
 git clone https://github.com/ddiem-ri-4D/epiTCR-KDA
 cd epiTCR-KDA/
-conda create --name kda python=3.6.8
-pip3 install pandas==2.0.3 tensorflow==2.13.0 keras==2.13.1 scikit-learn==1.1.2
+conda env create -f environment.yml
 source activate kda
 ```
 
