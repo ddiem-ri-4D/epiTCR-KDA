@@ -95,3 +95,6 @@ Please cite this paper if it helps your research:
 	eprint = {https://www.biorxiv.org/content/early/2024/05/21/2024.05.18.594806.full.pdf},
 	journal = {bioRxiv}}
 ```
+### 7. Reference
+
+My-Diem Nguyen Pham, Thanh-Nhan Nguyen, Le Son Tran, Que-Tran Bui Nguyen, Thien-Phuc Hoang Nguyen, Thi Mong Quynh Pham, Hoai-Nghia Nguyen, Hoa Giang, Minh-Duy Phan, Vy Nguyen, epiTCR: a highly sensitive predictor for TCR–peptide binding, Bioinformatics, Volume 39, Issue 5, May 2023, btad284, https://doi.org/10.1093/bioinformatics/btad284
