@@ -14,8 +14,8 @@ dependencies:
   - plotly                                               
   - scipy                        
   - scikit-learn
-	- pip
-	  - tqdm 
-		- sklearn 
-	  - imbalanced-learn             
+  - pip:
+    - tqdm 
+    - sklearn 
+    - imbalanced-learn             
 		               
