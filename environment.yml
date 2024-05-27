@@ -17,5 +17,4 @@ dependencies:
   - pip:
     - tqdm 
     - sklearn 
-    - imbalanced-learn             
-		               
+    - imbalanced-learn
