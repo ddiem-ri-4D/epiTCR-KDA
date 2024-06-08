@@ -29,12 +29,7 @@ def getProteinByDiheral(list_seq, link):
     return dict_lst
 
 def fn_downsampling(data):
-    X_train, y_train = data[['T1', 'T2', 'T3',
-       'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12', 'T13', 'T14',
-       'T15', 'T16', 'T17', 'T18', 'T19', 'T20', 'T21', 'T22', 'T23', 'T24',
-       'T25', 'T26', 'T27', 'T28', 'T29', 'T30', 'T31', 'T32', 'T33', 'T34',
-       'E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7', 'E8', 'E9', 'E10', 'E11',
-       'E12', 'E13', 'E14', 'E15', 'E16', 'E17', 'E18']], data[["binder"]]
+    X_train, y_train = data[[f'T{i}' for i in range(1, 35)] + [f'E{i}' for i in range(1, 19)]], data[["binder"]]
 
     nm = RandomUnderSampler(random_state=42)
     X_res, y_res = nm.fit_resample(X_train, y_train)
