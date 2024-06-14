@@ -12,21 +12,49 @@ def DATA_REPRESENTATION(DATA):
     
     return DATA_TCRpep_SPLIT
 
+# def getProteinByDiheral(list_seq, link):
+#     folder_path = link
+#     dict_lst = dict.fromkeys(list_seq)
+#     new_dict = {}
+
+#     for key, _ in dict_lst.items():
+#         csv_file = os.path.join(folder_path, key + ".tsv")
+#         if os.path.isfile(csv_file):
+#             df = pd.read_csv(csv_file, delimiter='\t', header=None)
+#             df.columns =['residueID', 'X_phi', 'Y_psi', 'label']
+#             df = df[["X_phi", "Y_psi"]]
+#             values = df.values.flatten().tolist()
+#             dict_lst[key] = values
+    
+#     return dict_lst
+
 def getProteinByDiheral(list_seq, link):
     folder_path = link
     dict_lst = dict.fromkeys(list_seq)
-    new_dict = {}
+    skipped_sequences = []
 
     for key, _ in dict_lst.items():
         csv_file = os.path.join(folder_path, key + ".tsv")
-        if os.path.isfile(csv_file):
-            df = pd.read_csv(csv_file, delimiter='\t', header=None)
-            df.columns =['residueID', 'X_phi', 'Y_psi', 'label']
-            df = df[["X_phi", "Y_psi"]]
-            values = df.values.flatten().tolist()
-            dict_lst[key] = values
-    
-    return dict_lst
+        if os.path.isfile(csv_file) and os.path.getsize(csv_file) > 0:
+            # print(f"Processing file: {csv_file}")
+            try:
+                df = pd.read_csv(csv_file, delimiter='\t', header=None)
+                df.columns = ['residueID', 'X_phi', 'Y_psi', 'label']
+                df = df[['X_phi', 'Y_psi']]
+                values = df.values.flatten().tolist()
+                dict_lst[key] = values
+            except pd.errors.EmptyDataError:
+                # Handle the EmptyDataError
+                print(f"EmptyDataError: Skipping {csv_file}")
+                skipped_sequences.append(key)
+        else:
+            print(f"File does not exist or is empty: {csv_file}")
+            skipped_sequences.append(key)
+
+    if skipped_sequences:
+        print(f"Skipped sequences: {', '.join(skipped_sequences)}")
+
+    return {k: v for k, v in dict_lst.items() if v is not None}
 
 def fn_downsampling(data):
     X_train, y_train = data[[f'T{i}' for i in range(1, 35)] + [f'E{i}' for i in range(1, 19)]], data[["binder"]]
