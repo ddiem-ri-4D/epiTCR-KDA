@@ -25,6 +25,7 @@ DATA_TEST = Processor.check_length_tcr(DATA_TEST)
 DATA_TEST = Processor.check_length_epi(DATA_TEST)
 DATA_TEST = DATA_TEST.reset_index(drop=True)
 
+# Data representation
 print("###---DATA REPRESENTATION")
 X_TEST = Processor.DATA_REPRESENTATION(DATA_TEST)
 X_TEST_cv = Processor.cv_data_kd(X_TEST)
