@@ -1,22 +1,19 @@
 import numpy as np
-import sys
 import pandas as pd
 import warnings
-import pandas as pd
-import numpy as np
-import modules.model as Model
+import sys
+from argparse import ArgumentParser
+from keras.models import load_model
 from imblearn.under_sampling import RandomUnderSampler
 import sklearn.metrics as metrics
 from tensorflow import keras
 from tensorflow.keras import layers
 import modules.architectures as KD
 import modules.processor as Processor
-import modules.model as Model
 
 warnings.filterwarnings('ignore')
-from argparse import ArgumentParser
 
-#Args parse
+# Args parse
 parser = ArgumentParser(description="Specifying Input Parameters")
 parser.add_argument("-tr", "--trainfile", help="Specify the full path of the training file with TCR sequences")
 parser.add_argument("-te", "--testfile", help="Specify the full path of the file with TCR sequences")
@@ -24,9 +21,9 @@ parser.add_argument("-sm", "--savemodel", help="Specify save model file")
 parser.add_argument("-o", "--outfile", default=sys.stdout, help="Specify output file")
 
 args = parser.parse_args()
-# print('Loading and encoding the dataset..')
-print("###---LOADING DATA")
 
+# Load and encode the dataset
+print("###---LOADING DATA")
 DATA_TRAIN = pd.read_parquet(args.trainfile)
 DATA_TEST = pd.read_parquet(args.testfile)
 
@@ -34,20 +31,20 @@ DATA_TRAIN, DATA_TEST = Processor.check_length_tcr(DATA_TRAIN), Processor.check_
 DATA_TRAIN, DATA_TEST = Processor.check_length_epi(DATA_TRAIN), Processor.check_length_epi(DATA_TEST)
 DATA_TRAIN, DATA_TEST = DATA_TRAIN.reset_index(drop=True), DATA_TEST.reset_index(drop=True)
 
-###--DATA_REPRESENTATION
+# Data representation
 print("###---DATA REPRESENTATION")
-
 DATA_TCRpep_SPLIT = Processor.DATA_REPRESENTATION(DATA_TRAIN)
 DATA_TRAIN_FULL = pd.concat([DATA_TRAIN, DATA_TCRpep_SPLIT], axis=1)
+
 X_TRAIN, y_TRAIN = Processor.fn_downsampling(DATA_TRAIN_FULL)
-X_TEST, y_TEST = Processor.DATA_REPRESENTATION(DATA_TEST),  DATA_TEST[["binder"]]
+X_TEST, y_TEST = Processor.DATA_REPRESENTATION(DATA_TEST), DATA_TEST[["binder"]]
+
 X_TRAIN_cv, y_TRAIN_cv = Processor.cv_data_kd(X_TRAIN), np.squeeze(np.array(y_TRAIN))
 X_TEST_cv, y_TEST_cv = Processor.cv_data_kd(X_TEST), np.squeeze(np.array(y_TEST))
 
-###--TRAINING
+# Training
 print("###---TRAINING")
-
-# Create the teacher
+# Create the teacher model
 teacher = keras.Sequential(
     [
         keras.Input(shape=(17, 4, 1)),
@@ -61,7 +58,7 @@ teacher = keras.Sequential(
     name="teacher",
 )
 
-# Create the student
+# Create the student model
 student = keras.Sequential(
     [
         keras.Input(shape=(17, 4, 1)),
@@ -78,22 +75,17 @@ student = keras.Sequential(
 student_scratch = keras.models.clone_model(student)
 batch_size = 64
 
-# Train teacher as a binary classifier
+# Compile and train the teacher model
 teacher.compile(
     optimizer=keras.optimizers.Adam(),
     loss=keras.losses.BinaryCrossentropy(from_logits=True),
     metrics=[keras.metrics.BinaryAccuracy()],
 )
 
-# Convert the labels for binary classification
-train_labels_binary = y_TRAIN_cv.copy()
-test_labels_binary = y_TEST_cv.copy()
+teacher.fit(X_TRAIN_cv, y_TRAIN_cv, epochs=5)
+teacher.evaluate(X_TEST_cv, y_TEST_cv)
 
-# Train and evaluate teacher on data
-teacher.fit(X_TRAIN_cv, train_labels_binary, epochs=5)
-teacher.evaluate(X_TEST_cv, test_labels_binary)
-
-# Initialize and compile distiller
+# Initialize and compile the distiller
 distiller = KD.Distiller(student=student, teacher=teacher)
 distiller.compile(
     optimizer=keras.optimizers.Adam(),
@@ -104,39 +96,27 @@ distiller.compile(
     temperature=5,
 )
 
-# Convert the labels for binary classification
-train_labels_binary = y_TRAIN_cv.copy()
-test_labels_binary = y_TEST_cv.copy()
-
 # Distill teacher to student
-distiller.fit(X_TRAIN_cv, train_labels_binary, epochs=3)
+distiller.fit(X_TRAIN_cv, y_TRAIN_cv, epochs=3)
+distiller.evaluate(X_TEST_cv, y_TEST_cv)
 
-# Evaluate student on test dataset
-distiller.evaluate(X_TEST_cv, test_labels_binary)
-
-# Train student as done usually
+# Compile and train the student model from scratch
 student_scratch.compile(
     optimizer=keras.optimizers.Adam(),
     loss=keras.losses.BinaryCrossentropy(from_logits=True),
     metrics=[keras.metrics.BinaryAccuracy()],
 )
 
-# Convert the labels for binary classification
-train_labels_binary = y_TRAIN_cv.copy()
-test_labels_binary = y_TEST_cv.copy()
-
-# Train and evaluate student trained from scratch.
-student_scratch.fit(X_TRAIN_cv, train_labels_binary, epochs=3)
-student_scratch.evaluate(X_TEST_cv, test_labels_binary)
+student_scratch.fit(X_TRAIN_cv, y_TRAIN_cv, epochs=3)
+student_scratch.evaluate(X_TEST_cv, y_TEST_cv)
 student_scratch.save(args.savemodel)
 
-###---Evaluation
+# Evaluation
 print("###---EVALUATION")
 predicted_probabilities = student_scratch.predict(X_TEST_cv)
-predicted_labels = predicted_probabilities.argmax(axis=1)
 predicted_labels = (predicted_probabilities >= 0.5).astype(int)
 
-df_label = pd.DataFrame(zip(predicted_probabilities.squeeze(), predicted_labels.squeeze()), columns=['proba_pred', 'binder_pred'])
+df_label = pd.DataFrame({'proba_pred': predicted_probabilities.squeeze(), 'binder_pred': predicted_labels.squeeze()})
 data_pred = pd.concat([DATA_TEST, df_label], axis=1)
 
 print("###---SAVE DATA")
