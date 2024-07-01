@@ -1,78 +1,36 @@
-import sklearn.metrics as metrics
-
-from tensorflow import keras
-from tensorflow.keras import layers
-
-from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix
-from sklearn.model_selection import cross_validate, GridSearchCV
-from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.metrics import confusion_matrix, accuracy_score, roc_auc_score, classification_report, roc_curve,auc, f1_score
-from sklearn.metrics import classification_report
-
-import pandas as pd
 import numpy as np
-import pickle
-
+import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from tqdm import tqdm
-import time
-import functools
+from tensorflow import keras
+from sklearn.metrics import (
+    accuracy_score, roc_auc_score, classification_report,
+    confusion_matrix, f1_score, roc_curve, auc
+)
+from sklearn.model_selection import cross_validate, GridSearchCV
 
 def check_false_pos_neg(model_test, test, pX_test, py_test):
-    y_true = py_test["binder"]
+    y_true = py_test["binder"].to_numpy()
     
     predicted_probabilities = model_test.predict(pX_test)
-    predicted_labels = predicted_probabilities.argmax(axis=1)
     predicted_labels = (predicted_probabilities >= 0.5).astype(int)
     y_pred = predicted_labels
 
-    FP_index = []
-    for idx in test.index:
-        if y_pred[idx] == 1 and y_pred[idx] != y_true[idx]:
-            FP_index.append(idx) 
-    false_positive = pd.DataFrame(test.loc[FP_index, "epitope"].value_counts())
-    false_positive.rename(columns={"epitope": "number of false positive"}, inplace = True)
+    FP_index = test.index[(y_pred == 1) & (y_pred != y_true)]
+    FN_index = test.index[(y_pred == 0) & (y_pred != y_true)]
 
-    FN_index = []
-    for idx in test.index:
-        if y_pred[idx] == 0 and y_pred[idx] != y_true[idx]:
-            FN_index.append(idx) 
-    false_negative = pd.DataFrame(test.loc[FN_index, "epitope"].value_counts())
-    false_negative.rename(columns={"epitope": "number of false negative"}, inplace = True)
+    false_positive = test.loc[FP_index, "epitope"].value_counts().rename("number of false positive").to_frame()
+    false_negative = test.loc[FN_index, "epitope"].value_counts().rename("number of false negative").to_frame()
 
-    total_pos = pd.DataFrame(test[test["binder"]==1]["epitope"].value_counts())
-    total_pos.rename(columns={"epitope": "number of positive"}, inplace = True)
-    total_neg = pd.DataFrame(test[test["binder"]==0]["epitope"].value_counts())
-    total_neg.rename(columns={"epitope": "number of negative"}, inplace = True)
-
-    total = pd.DataFrame(test["epitope"].value_counts())
-    total.rename(columns={"epitope": "total in testset"}, inplace = True)
+    total_pos = test[test["binder"] == 1]["epitope"].value_counts().rename("number of positive").to_frame()
+    total_neg = test[test["binder"] == 0]["epitope"].value_counts().rename("number of negative").to_frame()
+    total = test["epitope"].value_counts().rename("total in testset").to_frame()
 
     false_pos_neg_loc = pd.concat([false_positive, false_negative, total_pos, total_neg, total], axis=1).fillna(0)
     false_pos_neg_loc["epitope"] = false_pos_neg_loc.index
-   # Get the column names in the DataFrame
-    columns = false_pos_neg_loc.columns.tolist()
-    
-    # Rename the columns with duplicate 'count' labels
-    false_pos_neg_loc.columns = [
-        ("number of false positive" if (col == 'count' and idx == 0) else col) for idx, col in enumerate(false_pos_neg_loc.columns)
-    ]
-    false_pos_neg_loc.columns = [
-        ("number of false negative" if (col == 'count' and idx == 1) else col) for idx, col in enumerate(false_pos_neg_loc.columns)
-    ]
-    false_pos_neg_loc.columns = [
-        ("number of positive" if (col == 'count' and idx == 2) else col) for idx, col in enumerate(false_pos_neg_loc.columns)
-    ]
-    false_pos_neg_loc.columns = [
-        ("number of negative" if (col == 'count' and idx == 3) else col) for idx, col in enumerate(false_pos_neg_loc.columns)
-    ]
-    false_pos_neg_loc.columns = [
-        ("total in testset" if (col == 'count' and idx == 4) else col) for idx, col in enumerate(false_pos_neg_loc.columns)
-    ]
 
-    false_pos_neg_loc = false_pos_neg_loc[[
+    return false_pos_neg_loc[[
         "epitope",
         "number of false positive",
         "number of false negative",
@@ -81,42 +39,30 @@ def check_false_pos_neg(model_test, test, pX_test, py_test):
         "total in testset"
     ]]
 
-    return false_pos_neg_loc
-
-# def modeling_kd(data_test, lst_unseen):
-#     lst_unseen = lst_unseen
-
-#     seen_data = data_test[~data_test.epitope.isin(lst_unseen)]
-#     unseen_data = data_test[data_test.epitope.isin(lst_unseen)]
-
-#     data_visu(data_test)
-#     data_visu(seen_data)
-#     data_visu(unseen_data)
-    
 def fn_lst_unseen(data_train, data_test):
     lst_pep_train = data_train.epitope.unique().tolist()
     lst_pep_test = data_test.epitope.unique().tolist()
     
-    res = [item for item in lst_pep_test if item not in lst_pep_train]
-    return res, len(res)
+    unseen_epitopes = [item for item in lst_pep_test if item not in lst_pep_train]
+    return unseen_epitopes, len(unseen_epitopes)
 
 def _rocAuc(y_true, y_score):
-    y_pred01_proba = y_score.to_numpy()
-    fpr, tpr, _ = metrics.roc_curve(y_true, y_pred01_proba)
-    auc = metrics.roc_auc_score(y_true, y_pred01_proba)
-    plt.plot(fpr,tpr,label="AUC = "+str(auc))
+    fpr, tpr, _ = roc_curve(y_true, y_score)
+    auc_value = roc_auc_score(y_true, y_score)
+    plt.plot(fpr, tpr, label=f"AUC = {auc_value:.3f}")
     plt.legend(loc=4)
     plt.show()
 
 def confusionMatrix(y_true, y_pred):
     target_names = ['Non-binder', 'Binder']
     print(classification_report(y_true, y_pred, target_names=target_names))
-    cm = pd.DataFrame(confusion_matrix(y_true, y_pred), index=target_names, columns=target_names)
+    cm = confusion_matrix(y_true, y_pred)
+    cm_df = pd.DataFrame(cm, index=target_names, columns=target_names)
     plt.figure(figsize=(6,4))
-    sns.heatmap(cm, annot=True, fmt='g')
-    plt.title('Confusion matrix')
-    plt.xlabel('Predicted values')
-    plt.ylabel('Actual values')
+    sns.heatmap(cm_df, annot=True, fmt='g')
+    plt.title('Confusion Matrix')
+    plt.xlabel('Predicted Values')
+    plt.ylabel('Actual Values')
     plt.show()
 
 def data_visu(data):
@@ -126,13 +72,14 @@ def data_visu(data):
     confusionMatrix(y_test, y_test_pred)
 
     tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
-    accuracy = float(accuracy_score(y_test, y_test_pred).ravel())
-    sensitivity = tp/(tp+fn)
-    specificity = tn/(tn+fp)
-    auc = metrics.roc_auc_score(y_test, data["proba_pred"])
-    print ("AUC : ", round(auc, 3))
-    print ("Accuracy score  : ", round(accuracy, 3))
-    print('Sensitivity (TPR): ', round(sensitivity, 3))
-    print('Specificity (TNR): ', round(specificity, 3))
+    accuracy = accuracy_score(y_test, y_test_pred)
+    sensitivity = tp / (tp + fn)
+    specificity = tn / (tn + fp)
+    auc_value = roc_auc_score(y_test, data["proba_pred"])
+
+    print(f"AUC: {auc_value:.3f}")
+    print(f"Accuracy: {accuracy:.3f}")
+    print(f"Sensitivity (TPR): {sensitivity:.3f}")
+    print(f"Specificity (TNR): {specificity:.3f}")
 
     _rocAuc(y_test, data["proba_pred"])
