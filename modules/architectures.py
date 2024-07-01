@@ -1,38 +1,20 @@
+import numpy as np
+import pandas as pd
 import sklearn.metrics as metrics
-
-from sklearn.model_selection import KFold
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import KFold, cross_val_score, train_test_split, cross_validate
 from sklearn.svm import SVC
 from sklearn.pipeline import make_pipeline
-from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix
-from sklearn.model_selection import train_test_split, cross_validate
-from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.metrics import confusion_matrix,accuracy_score,precision_score,recall_score,roc_auc_score,classification_report,roc_curve, auc
-from sklearn.metrics import classification_report
-from keras.models import load_model
-
-import pandas as pd
-import numpy as np
+from sklearn.metrics import (accuracy_score, roc_auc_score, confusion_matrix, classification_report,
+                             precision_score, recall_score, roc_curve, auc)
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
-
 import matplotlib.pyplot as plt
 import seaborn as sns
 from tqdm import tqdm
 import time
 import functools
-
-import numpy as np
-import pandas as pd
-import random
-import glob
-import itertools
-import tensorflow as tf
 from biopandas.pdb import PandasPdb
-from tensorflow import keras
-from tensorflow.keras import layers
 
 # Create the Distiller class
 class Distiller(keras.Model):
@@ -94,7 +76,6 @@ class Distiller(keras.Model):
 
         # Return a dictionary of metrics
         return {m.name: m.result() for m in self.metrics}
-        return results
 
     def test_step(self, data):
         # Unpack the data
@@ -109,7 +90,7 @@ class Distiller(keras.Model):
         # Calculate the loss
         student_loss = self.student_loss_fn(y_binary, y_prediction)
 
-        # Update the metrics.
+        # Update the metrics
         self.compiled_metrics.update_state(y_binary, y_prediction)
 
         # Return a dict of performance
@@ -120,7 +101,6 @@ class Distiller(keras.Model):
     def attention_based_feature_distillation(self, teacher_features, student_features):
         similarity_matrix = self.calculate_similarity(teacher_features, student_features)
         afd_loss = self.compute_afd_loss(similarity_matrix)
-        
         return afd_loss
 
     def calculate_similarity(self, teacher_features, student_features):
@@ -128,11 +108,11 @@ class Distiller(keras.Model):
         teacher_normalized = tf.nn.l2_normalize(teacher_features, axis=1)
         student_normalized = tf.nn.l2_normalize(student_features, axis=1)
         similarity_matrix = tf.matmul(teacher_normalized, student_normalized, transpose_b=True)
-        
         return similarity_matrix
 
     def compute_afd_loss(self, similarity_matrix):
-        # Mean squared error giữa similarity matrix
+        # Mean squared error between similarity matrices
         afd_loss = tf.reduce_mean(tf.square(similarity_matrix))
-        
         return afd_loss
+
+# Ensure to use the Distiller class in your training and evaluation workflow as needed.
