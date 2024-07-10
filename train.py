@@ -6,6 +6,7 @@ from argparse import ArgumentParser
 from keras.models import load_model
 from imblearn.under_sampling import RandomUnderSampler
 import sklearn.metrics as metrics
+from sklearn.model_selection import StratifiedKFold
 from tensorflow import keras
 from tensorflow.keras import layers
 import modules.architectures as KD
@@ -74,18 +75,23 @@ student = keras.Sequential(
 
 student_scratch = keras.models.clone_model(student)
 batch_size = 64
+epochs = 50
 
-# Compile and train the teacher model
+# Compile the teacher model
 teacher.compile(
     optimizer=keras.optimizers.Adam(),
     loss=keras.losses.BinaryCrossentropy(from_logits=True),
     metrics=[keras.metrics.BinaryAccuracy()],
 )
 
-teacher.fit(X_TRAIN_cv, y_TRAIN_cv, epochs=5)
-teacher.evaluate(X_TEST_cv, y_TEST_cv)
+# Compile the student model from scratch
+student_scratch.compile(
+    optimizer=keras.optimizers.Adam(),
+    loss=keras.losses.BinaryCrossentropy(from_logits=True),
+    metrics=[keras.metrics.BinaryAccuracy()],
+)
 
-# Initialize and compile the distiller
+# Initialize the distiller
 distiller = KD.Distiller(student=student, teacher=teacher)
 distiller.compile(
     optimizer=keras.optimizers.Adam(),
@@ -96,19 +102,26 @@ distiller.compile(
     temperature=5,
 )
 
-# Distill teacher to student
-distiller.fit(X_TRAIN_cv, y_TRAIN_cv, epochs=3)
-distiller.evaluate(X_TEST_cv, y_TEST_cv)
+# Stratified k-fold cross-validation
+skf = StratifiedKFold(n_splits=5)
 
-# Compile and train the student model from scratch
-student_scratch.compile(
-    optimizer=keras.optimizers.Adam(),
-    loss=keras.losses.BinaryCrossentropy(from_logits=True),
-    metrics=[keras.metrics.BinaryAccuracy()],
-)
+for train_index, val_index in skf.split(X_TRAIN_cv, y_TRAIN_cv):
+    X_train_fold, X_val_fold = X_TRAIN_cv[train_index], X_TRAIN_cv[val_index]
+    y_train_fold, y_val_fold = y_TRAIN_cv[train_index], y_TRAIN_cv[val_index]
 
-student_scratch.fit(X_TRAIN_cv, y_TRAIN_cv, epochs=3)
-student_scratch.evaluate(X_TEST_cv, y_TEST_cv)
+    # Train the teacher model
+    teacher.fit(X_train_fold, y_train_fold, validation_data=(X_val_fold, y_val_fold), epochs=epochs)
+    teacher.evaluate(X_TEST_cv, y_TEST_cv)
+
+    # Distill teacher to student
+    distiller.fit(X_train_fold, y_train_fold, validation_data=(X_val_fold, y_val_fold), epochs=epochs)
+    distiller.evaluate(X_TEST_cv, y_TEST_cv)
+
+    # Train the student model from scratch
+    student_scratch.fit(X_train_fold, y_train_fold, validation_data=(X_val_fold, y_val_fold), epochs=epochs)
+    student_scratch.evaluate(X_TEST_cv, y_TEST_cv)
+
+# Save the trained student model
 student_scratch.save(args.savemodel)
 
 # Evaluation
