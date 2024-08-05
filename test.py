@@ -19,29 +19,29 @@ args = parser.parse_args()
 
 # Load and encode the dataset
 print("###---LOADING DATA")
-DATA_TEST = pd.read_parquet(args.testfile)
+test_data = pd.read_parquet(args.testfile)
 
-DATA_TEST = Processor.check_length_tcr(DATA_TEST)
-DATA_TEST = Processor.check_length_epi(DATA_TEST)
-DATA_TEST = DATA_TEST.reset_index(drop=True)
+test_data = Processor.check_length_tcr(test_data)
+test_data = Processor.check_length_epi(test_data)
+test_data = test_data.reset_index(drop=True)
 
 # Data representation
 print("###---DATA REPRESENTATION")
-X_TEST = Processor.DATA_REPRESENTATION(DATA_TEST)
-X_TEST_cv = Processor.cv_data_kd(X_TEST)
+X_test = Processor.DATA_REPRESENTATION(test_data)
+X_test_cv = Processor.cv_data_kd(X_test)
 
 # Load pre-trained model
 print("###---LOAD MODEL PRETRAINING")
-student_scratch = load_model(args.savedmodel)
+loaded_model = load_model(args.savedmodel)
 
 # Evaluation
 print("###---EVALUATION")
-predicted_probabilities = student_scratch.predict(X_TEST_cv)
+predicted_probabilities = loaded_model.predict(X_test_cv)
 predicted_labels = (predicted_probabilities >= 0.5).astype(int)
 
-df_label = pd.DataFrame({'proba_pred': predicted_probabilities.squeeze(), 'binder_pred': predicted_labels.squeeze()})
-data_pred = pd.concat([DATA_TEST, df_label], axis=1)
+results_df = pd.DataFrame({'proba_pred': predicted_probabilities.squeeze(), 'binder_pred': predicted_labels.squeeze()})
+predicted_data = pd.concat([test_data, results_df], axis=1)
 
 # Save the predictions
 print("###---SAVE DATA")
-data_pred.to_parquet(args.outfile)
+predicted_data.to_parquet(args.outfile)
