@@ -1,24 +1,23 @@
-#Check have in PDB
-
 import os
-thu_muc_pep =  './datasets/DA_TSVFiles'
 
-def read2seq(LST_SEQ, thu_muc):
-    danh_sach_tep_tsv = []
-    for tep in os.listdir(thu_muc):
-        if tep.endswith(".tsv"):
-            danh_sach_tep_tsv.append(tep[:-4])
-    FINAL_TSV = [cdr3 for cdr3 in LST_SEQ if cdr3 not in danh_sach_tep_tsv]
-    return FINAL_TSV
+def read2seq(sequence_list, directory):
+    tsv_files = []
+    for file in os.listdir(directory):
+        if file.endswith(".tsv"):
+            tsv_files.append(file[:-4])
+    final_tsv = [seq for seq in sequence_list if seq not in tsv_files]
+    return final_tsv
 
-LST_SEQ = read2seq(DF.CDR3b.unique(), thu_muc_pep)
+peptide_directory = './datasets/DA_TSVFiles'
 
+# Assuming DF is defined somewhere in your actual code
+# DF should be a pandas DataFrame that contains a column named 'CDR3b'
+sequence_list = read2seq(DF.CDR3b.unique(), peptide_directory)
 
-FILE = "./LST_FORRUN.fasta"
-DATA = LST_SEQ
+output_file = "./LST_FORRUN.fasta"
 
-with open(FILE, 'w') as fp:
-    for item in DATA:
-        fp.write(">%s\n" % item)
-        fp.write("%s\n" % item)
+with open(output_file, 'w') as file:
+    for sequence in sequence_list:
+        file.write(">%s\n" % sequence)
+        file.write("%s\n" % sequence)
     print('Done')
