@@ -3,109 +3,103 @@ import numpy as np
 import os
 from imblearn.under_sampling import RandomUnderSampler
 
-def DATA_REPRESENTATION(DATA):
-    DATA_cdr3 = getProteinByDiheral(DATA.CDR3b.unique(), "./datasets/DA_TSVFiles/")
-    DATA_pep = getProteinByDiheral(DATA.epitope.unique(), "./datasets/DA_TSVFiles/")
+def DATA_REPRESENTATION(data):
+    cdr3_data = getProteinByDiheral(data.CDR3b.unique(), "./datasets/DA_TSVFiles/")
+    epitope_data = getProteinByDiheral(data.epitope.unique(), "./datasets/DA_TSVFiles/")
 
-    DATA_TCRpep = DAtoDataFrame(DATA, DATA_cdr3, DATA_pep)
-    DATA_TCRpep_SPLIT = DATA_TCRpep[[f'T{i}' for i in range(1, 35)] + [f'E{i}' for i in range(1, 19)]]
+    combined_data = DAtoDataFrame(data, cdr3_data, epitope_data)
+    combined_data_split = combined_data[[f'T{i}' for i in range(1, 35)] + [f'E{i}' for i in range(1, 19)]]
     
-    return DATA_TCRpep_SPLIT
+    return combined_data_split
 
-def getProteinByDiheral(list_seq, link):
-    folder_path = link
-    dict_lst = dict.fromkeys(list_seq)
+def getProteinByDiheral(sequence_list, folder_path):
+    protein_data = dict.fromkeys(sequence_list)
     skipped_sequences = []
 
-    for key, _ in dict_lst.items():
-        csv_file = os.path.join(folder_path, key + ".tsv")
+    for sequence in sequence_list:
+        file_path = os.path.join(folder_path, sequence + ".tsv")
         
-        if not os.path.isfile(csv_file):
-            raise FileNotFoundError(f"File does not exist: {csv_file}")
+        if not os.path.isfile(file_path):
+            raise FileNotFoundError(f"File does not exist: {file_path}")
         
-        if os.path.getsize(csv_file) == 0:
-            print(f"File is empty: {csv_file}")
-            skipped_sequences.append(key)
+        if os.path.getsize(file_path) == 0:
+            print(f"File is empty: {file_path}")
+            skipped_sequences.append(sequence)
             continue
         
-        # Process the file
         try:
-            df = pd.read_csv(csv_file, delimiter='\t', header=None)
+            df = pd.read_csv(file_path, delimiter='\t', header=None)
             df.columns = ['residueID', 'X_phi', 'Y_psi', 'label']
             df = df[['X_phi', 'Y_psi']]
-            values = df.values.flatten().tolist()
-            dict_lst[key] = values
+            protein_data[sequence] = df.values.flatten().tolist()
         except pd.errors.EmptyDataError:
-            print(f"EmptyDataError: Skipping {csv_file}")
-            skipped_sequences.append(key)
+            print(f"EmptyDataError: Skipping {file_path}")
+            skipped_sequences.append(sequence)
 
     if skipped_sequences:
         print(f"Skipped sequences: {', '.join(skipped_sequences)}")
 
-    return {k: v for k, v in dict_lst.items() if v is not None}
+    return {k: v for k, v in protein_data.items() if v is not None}
 
 def fn_downsampling(data):
-    X_train = data[[f'T{i}' for i in range(1, 35)] + [f'E{i}' for i in range(1, 19)]]
-    y_train = data[["binder"]]
+    features = data[[f'T{i}' for i in range(1, 35)] + [f'E{i}' for i in range(1, 19)]]
+    labels = data[["binder"]]
 
-    nm = RandomUnderSampler(random_state=42)
-    X_res, y_res = nm.fit_resample(X_train, y_train)
-    X_res, y_res = X_res.reset_index(drop=True), y_res.reset_index(drop=True)
+    undersampler = RandomUnderSampler(random_state=42)
+    resampled_features, resampled_labels = undersampler.fit_resample(features, labels)
+    resampled_features, resampled_labels = resampled_features.reset_index(drop=True), resampled_labels.reset_index(drop=True)
     
-    return X_res, y_res
+    return resampled_features, resampled_labels
 
 def cvVectorDict2DF(vector, prefix, num_columns):
     vector = {key: value for key, value in vector.items() if value is not None}
     
-    temp = pd.DataFrame.from_dict(vector, orient='index')
-    temp.columns = [f"{prefix}{i}" for i in range(1, temp.shape[1] + 1)]
+    df = pd.DataFrame.from_dict(vector, orient='index')
+    df.columns = [f"{prefix}{i}" for i in range(1, df.shape[1] + 1)]
     
-    for i in range(len(temp.columns) + 1, num_columns + 1):
-        temp[f"{prefix}{i}"] = 0
+    for i in range(len(df.columns) + 1, num_columns + 1):
+        df[f"{prefix}{i}"] = 0
     
-    return temp
+    return df
 
-def DAtoDataFrame(SAMPLE, SAMPLE_CDR3, SAMPLE_PEP):
-    SAMPLE_CDR3 = cvVectorDict2DF(SAMPLE_CDR3, "T", 34)
-    SAMPLE_PEP = cvVectorDict2DF(SAMPLE_PEP, "E", 18)
+def DAtoDataFrame(sample, cdr3_data, epitope_data):
+    cdr3_df = cvVectorDict2DF(cdr3_data, "T", 34)
+    epitope_df = cvVectorDict2DF(epitope_data, "E", 18)
     
-    SAMPLE_CDR3_df = SAMPLE_CDR3.reset_index().rename(columns={"index": "CDR3b"})
-    SAMPLE_PEP_df = SAMPLE_PEP.reset_index().rename(columns={"index": "epitope"})
+    cdr3_df = cdr3_df.reset_index().rename(columns={"index": "CDR3b"})
+    epitope_df = epitope_df.reset_index().rename(columns={"index": "epitope"})
 
-    SAMPLE_SPLIT_cdr3_merge = SAMPLE.merge(SAMPLE_CDR3_df, how='left', on='CDR3b')
-    SAMPLE_SPLIT_pep_merge = SAMPLE_SPLIT_cdr3_merge.merge(SAMPLE_PEP_df, how='left', on='epitope')
+    merged_data = sample.merge(cdr3_df, how='left', on='CDR3b')
+    merged_data = merged_data.merge(epitope_df, how='left', on='epitope')
     
-    columns_to_fill_T = [f'T{i}' for i in range(1, 35)]
-    columns_to_fill_E = [f'E{i}' for i in range(1, 19)]
+    merged_data[[f'T{i}' for i in range(1, 35)]] = merged_data[[f'T{i}' for i in range(1, 35)]].fillna(0)
+    merged_data[[f'E{i}' for i in range(1, 19)]] = merged_data[[f'E{i}' for i in range(1, 19)]].fillna(0)
+    final_data = merged_data.dropna(subset=['T1', 'E1']).copy()
     
-    SAMPLE_SPLIT_pep_merge[columns_to_fill_T] = SAMPLE_SPLIT_pep_merge[columns_to_fill_T].fillna(0)
-    SAMPLE_SPLIT_pep_merge[columns_to_fill_E] = SAMPLE_SPLIT_pep_merge[columns_to_fill_E].fillna(0)
-    SAMPLE_SPLIT_TCRpep = SAMPLE_SPLIT_pep_merge.dropna(subset=['T1', 'E1']).copy()
+    return final_data
+
+def cv_data_kd(test_features):
+    cdr3_features = test_features.iloc[:, :34].values.reshape((len(test_features), 17, 2))
+    epitope_features = test_features.iloc[:, 34:].values.reshape((len(test_features), 9, 2))
+
+    combined_features = []
+    nan_array = np.full((cdr3_features.shape[1] - epitope_features.shape[1], epitope_features.shape[2]), 0)
+    for cdr3, epitope in zip(cdr3_features, epitope_features):
+        combined = np.concatenate((cdr3, np.concatenate((epitope, nan_array), axis=0)), axis=1)
+        combined_features.append(combined)
+
+    return np.expand_dims(np.array(combined_features), axis=-1)
+
+def fn_lst_unseen(train_data, test_data):
+    train_epitopes = train_data.epitope.unique().tolist()
+    test_epitopes = test_data.epitope.unique().tolist()
     
-    return SAMPLE_SPLIT_TCRpep
-
-def cv_data_kd(PTEST_X):
-    PTEST_X_CDR3 = PTEST_X.iloc[:, :34].values.reshape((len(PTEST_X), 17, 2))
-    PTEST_X_epitope = PTEST_X.iloc[:, 34:].values.reshape((len(PTEST_X), 9, 2))
-
-    PTEST_X_cv = []
-    nan_array = np.full((PTEST_X_CDR3.shape[1] - PTEST_X_epitope.shape[1], PTEST_X_epitope.shape[2]), 0)
-    for cdr3, epitope in zip(PTEST_X_CDR3, PTEST_X_epitope):
-        tmp = np.concatenate((cdr3, np.concatenate((epitope, nan_array), axis=0)), axis=1)
-        PTEST_X_cv.append(tmp)
-
-    return np.expand_dims(np.array(PTEST_X_cv), axis=-1)
-
-def fn_lst_unseen(data_train, data_test):
-    lst_pep_train = data_train.epitope.unique().tolist()
-    lst_pep_test = data_test.epitope.unique().tolist()
-    
-    unseen_epitopes = [item for item in lst_pep_test if item not in lst_pep_train]
+    unseen_epitopes = [epitope for epitope in test_epitopes if epitope not in train_epitopes]
     return unseen_epitopes, len(unseen_epitopes)
 
 def check_length_epitope(df):
-    discard = ["\*", '_', '-', 'O', '1', 'y', 'l', 'X', '/', ' ', '#', '\(', '\?']
-    df = df[~df.Antigen.str.contains('|'.join(discard))]
+    invalid_chars = ["\*", '_', '-', 'O', '1', 'y', 'l', 'X', '/', ' ', '#', '\(', '\?']
+    df = df[~df.Antigen.str.contains('|'.join(invalid_chars))]
     df["len_epitope"] = df.Antigen.str.len()
     df = df[(df["len_epitope"] <= 11) & (df["len_epitope"] >= 8)]
     df = df.drop(['len_epitope'], axis=1).reset_index(drop=True)
@@ -115,16 +109,16 @@ def process_sequence(sequence):
     return sequence[1:-1] if sequence.startswith('C') and sequence.endswith('F') else sequence
 
 def check_length_tcr(df):
-    discard = ["\*", '_', '-', 'O', '1', 'y', 'l', 'X', '/', ' ', '#', '\(', '\?']
-    df = df[~df["CDR3b"].str.contains('|'.join(discard))]
+    invalid_chars = ["\*", '_', '-', 'O', '1', 'y', 'l', 'X', '/', ' ', '#', '\(', '\?']
+    df = df[~df["CDR3b"].str.contains('|'.join(invalid_chars))]
     df["CDR3b"] = df["CDR3b"].apply(process_sequence)
     df["len_cdr3"] = df["CDR3b"].str.len()
     df = df[(df["len_cdr3"] <= 19) & (df["len_cdr3"] >= 8)].drop(['len_cdr3'], axis=1).reset_index(drop=True)
     return df
 
 def check_length_epi(df):
-    discard = ["\*", '_', '-', 'O', '1', 'y', 'l', 'X', '/', ' ', '#', '\(', '\?']
-    df = df[~df["epitope"].str.contains('|'.join(discard), na=False)]
+    invalid_chars = ["\*", '_', '-', 'O', '1', 'y', 'l', 'X', '/', ' ', '#', '\(', '\?']
+    df = df[~df["epitope"].str.contains('|'.join(invalid_chars), na=False)]
     df["len_epi"] = df["epitope"].str.len()
     df = df[(df["len_epi"] <= 11) & (df["len_epi"] >= 8)].drop(['len_epi'], axis=1).reset_index(drop=True)
     return df
