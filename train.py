@@ -52,14 +52,17 @@ teacher = keras.Sequential(
         layers.Conv2D(64, (3, 3), strides=(2, 2), padding="same"),
         layers.LeakyReLU(alpha=0.2),
         layers.MaxPooling2D(pool_size=(2, 2), strides=(1, 1), padding="same"),
+        layers.Conv2D(128, (3, 3), strides=(2, 2), padding="same"),
+        layers.LeakyReLU(alpha=0.2),
+        layers.MaxPooling2D(pool_size=(2, 2), strides=(1, 1), padding="same"),
         layers.Conv2D(256, (3, 3), strides=(2, 2), padding="same"),
         layers.Flatten(),
-        layers.Dense(1, activation="sigmoid"),  
+        layers.Dense(1, activation="sigmoid"),
     ],
     name="teacher",
 )
 
-# Create the student model
+# Create the student model with specified layers
 student = keras.Sequential(
     [
         keras.Input(shape=(17, 4, 1)),
@@ -67,8 +70,11 @@ student = keras.Sequential(
         layers.LeakyReLU(alpha=0.2),
         layers.MaxPooling2D(pool_size=(2, 2), strides=(1, 1), padding="same"),
         layers.Conv2D(32, (3, 3), strides=(2, 2), padding="same"),
+        layers.LeakyReLU(alpha=0.2),
+        layers.MaxPooling2D(pool_size=(2, 2), strides=(1, 1), padding="same"),
+        layers.Conv2D(64, (3, 3), strides=(2, 2), padding="same"),
         layers.Flatten(),
-        layers.Dense(1, activation="sigmoid"),  
+        layers.Dense(1, activation="sigmoid"),
     ],
     name="student",
 )
@@ -103,7 +109,7 @@ distiller.compile(
 )
 
 # Stratified k-fold cross-validation
-skf = StratifiedKFold(n_splits=5)
+skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
 for train_index, val_index in skf.split(X_TRAIN_cv, y_TRAIN_cv):
     X_train_fold, X_val_fold = X_TRAIN_cv[train_index], X_TRAIN_cv[val_index]
