@@ -50,7 +50,7 @@ cd utils
 python3 PDB2DA.py
 ```
 
-### 4. Retraining and predict model
+### 4. Retrain and Predict Model
 - `train.parquet`/`test.parquet`: input parquet file with 3 columns named as "CDR3b, epitope, binder (if training)": TCR-beta CDR3 sequence, peptide sequence, and CDR3b and peptide bind together or not.
 
 | CDR3b         | epitope       | binder|
@@ -78,7 +78,7 @@ python3 test.py \
 ```
 
 ### 5. Contact
-For more questions or feedback, please simply post an [Issue](https://github.com/ddiem-ri-4D/epiTCR-KDA/issues/new).
+For more questions or feedback, please post an [Issue](https://github.com/ddiem-ri-4D/epiTCR-KDA/issues/new).
 
 ### 6. Citation
 Please cite this paper if it helps your research:
