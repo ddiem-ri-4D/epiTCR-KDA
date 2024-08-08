@@ -2,51 +2,49 @@ import numpy as np
 import pandas as pd
 import warnings
 import os
+import sys
 from tensorflow import keras
 from tensorflow.keras import layers
 from sklearn.model_selection import StratifiedKFold
-import modules.architectures as KD
-import modules.processor as Processor
-from keras.models import load_model
 from argparse import ArgumentParser
+import modules.architectures as KD
+import modules.processor as processor
 
 warnings.filterwarnings('ignore')
 
-# Args parse
-parser = ArgumentParser(description="Specifying Input Parameters")
-parser.add_argument("-tr", "--trainfile", help="Specify the full path of the training file with TCR sequences")
-parser.add_argument("-te", "--testfile", help="Specify the full path of the file with TCR sequences")
-parser.add_argument("-sm", "--savemodel", help="Specify save model file")
-parser.add_argument("-otest", "--outfiletest", default=sys.stdout, help="Specify output file")
+def main():
+    # Argument parsing
+    parser = ArgumentParser(description="Specifying Input Parameters")
+    parser.add_argument("-tr", "--trainfile", help="Specify the full path of the training file with TCR sequences")
+    parser.add_argument("-te", "--testfile", help="Specify the full path of the file with TCR sequences")
+    parser.add_argument("-sm", "--savemodel", help="Specify save model file")
+    parser.add_argument("-otest", "--outfiletest", default=sys.stdout, help="Specify output file")
 
-args = parser.parse_args()
+    args = parser.parse_args()
 
-print("###---LOADING DATA")
+    print("###---LOADING DATA")
+    train_data = pd.read_parquet(args.trainfile)
+    test_data = pd.read_parquet(args.testfile)
+    train_data = train_data.reset_index(drop=True)
+    test_data = test_data.reset_index(drop=True)
 
-train_data = pd.read_parquet(args.trainfile)
-test_data = pd.read_parquet(args.testfile)
-train_data = train_data.reset_index(drop=True)
-test_data = test_data.reset_index(drop=True)
+    train_data = train_data[["CDR3b", "epitope", "binder"]]
+    test_data = test_data[["CDR3b", "epitope", "binder"]]
 
-train_data = train_data[["CDR3b", "epitope", "binder"]]
-test_data = test_data[["CDR3b", "epitope", "binder"]]
+    print("###---DATA REPRESENTATION")
+    tcr_epitope_split = processor.data_representation(train_data)
+    full_train_data = pd.concat([train_data, tcr_epitope_split], axis=1)
+    X_train, y_train = processor.downsample_data(full_train_data)
 
-print("###---DATA REPRESENTATION")
+    X_test, y_test = processor.data_representation(test_data), test_data[["binder"]]
 
-tcr_epitope_split = Processor.DATA_REPRESENTATION(train_data)
-full_train_data = pd.concat([train_data, tcr_epitope_split], axis=1)
-X_train, y_train = Processor.fn_downsampling(full_train_data)
+    X_train_cv, y_train_cv = processor.prepare_cv_data(X_train), np.squeeze(np.array(y_train))
+    X_test_cv, y_test_cv = processor.prepare_cv_data(X_test), np.squeeze(np.array(y_test))
 
-X_test, y_test = Processor.DATA_REPRESENTATION(test_data), test_data[["binder"]]
+    print("###---TRAINING")
 
-X_train_cv, y_train_cv = Processor.cv_data_kd(X_train), np.squeeze(np.array(y_train))
-X_test_cv, y_test_cv = Processor.cv_data_kd(X_test), np.squeeze(np.array(y_test))
-
-print("###---TRAINING")
-
-# Create the teacher model with specified layers
-teacher_model = keras.Sequential(
-    [
+    # Define teacher model
+    teacher_model = keras.Sequential([
         keras.Input(shape=(17, 4, 1)),
         layers.Conv2D(64, (3, 3), strides=(2, 2), padding="same"),
         layers.LeakyReLU(alpha=0.2),
@@ -57,13 +55,10 @@ teacher_model = keras.Sequential(
         layers.Conv2D(256, (3, 3), strides=(2, 2), padding="same"),
         layers.Flatten(),
         layers.Dense(1, activation="sigmoid"),
-    ],
-    name="teacher_model",
-)
+    ], name="teacher_model")
 
-# Create the student model with specified layers
-student_model = keras.Sequential(
-    [
+    # Define student model
+    student_model = keras.Sequential([
         keras.Input(shape=(17, 4, 1)),
         layers.Conv2D(16, (3, 3), strides=(2, 2), padding="same"),
         layers.LeakyReLU(alpha=0.2),
@@ -74,82 +69,77 @@ student_model = keras.Sequential(
         layers.Conv2D(64, (3, 3), strides=(2, 2), padding="same"),
         layers.Flatten(),
         layers.Dense(1, activation="sigmoid"),
-    ],
-    name="student_model",
-)
+    ], name="student_model")
 
-# Clone student model for later comparison
-student_scratch_model = keras.models.clone_model(student_model)
+    # Clone student model for baseline comparison
+    student_scratch_model = keras.models.clone_model(student_model)
 
-batch_size = 64
+    batch_size = 64
 
-# Train teacher model as a binary classifier
-teacher_model.compile(
-    optimizer=keras.optimizers.Adam(),
-    loss=keras.losses.BinaryCrossentropy(from_logits=True),
-    metrics=[keras.metrics.BinaryAccuracy()],
-)
+    # Compile teacher model
+    teacher_model.compile(
+        optimizer=keras.optimizers.Adam(),
+        loss=keras.losses.BinaryCrossentropy(from_logits=True),
+        metrics=[keras.metrics.BinaryAccuracy()],
+    )
 
-# Convert the labels for binary classification
-train_labels_binary = y_train_cv.copy()
-test_labels_binary = y_test_cv.copy()
+    # Stratified cross-validation
+    stratified_kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    cross_val_scores = []
 
-# Stratified cross-validation setup
-stratified_kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-cross_val_scores = []
+    for train_idx, val_idx in stratified_kfold.split(X_train_cv, y_train_cv):
+        X_train_fold, X_val_fold = X_train_cv[train_idx], X_train_cv[val_idx]
+        y_train_fold, y_val_fold = y_train_cv[train_idx], y_train_cv[val_idx]
 
-for train_idx, val_idx in stratified_kfold.split(X_train_cv, train_labels_binary):
-    X_train_fold, X_val_fold = X_train_cv[train_idx], X_train_cv[val_idx]
-    y_train_fold, y_val_fold = train_labels_binary[train_idx], train_labels_binary[val_idx]
+        teacher_model.fit(X_train_fold, y_train_fold, epochs=5, batch_size=batch_size, verbose=1)
+        scores = teacher_model.evaluate(X_val_fold, y_val_fold, verbose=1)
+        cross_val_scores.append(scores[1])
 
-    teacher_model.fit(X_train_fold, y_train_fold, epochs=5, batch_size=batch_size, verbose=1)
-    scores = teacher_model.evaluate(X_val_fold, y_val_fold, verbose=1)
-    cross_val_scores.append(scores[1])
+    # Train teacher model on full data
+    teacher_model.fit(X_train_cv, y_train_cv, epochs=5)
+    teacher_model.evaluate(X_test_cv, y_test_cv)
 
-print(f"Cross-validation accuracy scores: {cross_val_scores}")
-print(f"Mean cross-validation accuracy: {np.mean(cross_val_scores)}")
+    # Initialize and compile distiller
+    distiller = KD.Distiller(student=student_model, teacher=teacher_model)
+    distiller.compile(
+        optimizer=keras.optimizers.Adam(),
+        metrics=[keras.metrics.BinaryAccuracy()],
+        student_loss_fn=keras.losses.BinaryCrossentropy(from_logits=True),
+        distillation_loss_fn=keras.losses.KLDivergence(),
+        alpha=0.1,
+        temperature=5,
+    )
 
-# Train and evaluate teacher on full training data
-teacher_model.fit(X_train_cv, train_labels_binary, epochs=5)
-teacher_model.evaluate(X_test_cv, test_labels_binary)
+    # Distillation process
+    distiller.fit(X_train_cv, y_train_cv, epochs=3)
+    distiller.evaluate(X_test_cv, y_test_cv)
 
-# Initialize and compile distiller
-distiller = KD.Distiller(student=student_model, teacher=teacher_model)
-distiller.compile(
-    optimizer=keras.optimizers.Adam(),
-    metrics=[keras.metrics.BinaryAccuracy()],
-    student_loss_fn=keras.losses.BinaryCrossentropy(from_logits=True),
-    distillation_loss_fn=keras.losses.KLDivergence(),
-    alpha=0.1,
-    temperature=5,
-)
+    # Train student model from scratch
+    student_scratch_model.compile(
+        optimizer=keras.optimizers.Adam(),
+        loss=keras.losses.BinaryCrossentropy(from_logits=True),
+        metrics=[keras.metrics.BinaryAccuracy()],
+    )
 
-# Distill teacher to student
-distiller.fit(X_train_cv, train_labels_binary, epochs=3)
+    student_scratch_model.fit(X_train_cv, y_train_cv, epochs=3)
+    student_scratch_model.evaluate(X_test_cv, y_test_cv)
 
-# Evaluate student on test dataset
-distiller.evaluate(X_test_cv, test_labels_binary)
+    # Save the trained student model
+    student_scratch_model.save(args.savemodel)
 
-# Train student as done usually
-student_scratch_model.compile(
-    optimizer=keras.optimizers.Adam(),
-    loss=keras.losses.BinaryCrossentropy(from_logits=True),
-    metrics=[keras.metrics.BinaryAccuracy()],
-)
+    print("###---EVALUATION-TEST")
 
-# Train and evaluate student trained from scratch
-student_scratch_model.fit(X_train_cv, train_labels_binary, epochs=3)
-student_scratch_model.evaluate(X_test_cv, test_labels_binary)
+    predicted_probabilities = student_scratch_model.predict(X_test_cv)
+    predicted_labels = (predicted_probabilities >= 0.5).astype(int)
 
-student_scratch_model.save(args.savemodel)
+    df_label = pd.DataFrame({
+        'proba_pred': predicted_probabilities.squeeze(),
+        'binder_pred': predicted_labels.squeeze()
+    })
+    data_pred = pd.concat([test_data, df_label], axis=1)
 
-print("###---EVALUATION-TEST")
+    print("###---SAVE DATA TEST")
+    data_pred.to_parquet(args.outfiletest)
 
-predicted_probabilities = student_scratch_model.predict(X_test_cv)
-predicted_labels = (predicted_probabilities >= 0.5).astype(int)
-
-df_label = pd.DataFrame(zip(predicted_probabilities.squeeze(), predicted_labels.squeeze()), columns=['proba_pred', 'binder_pred'])
-data_pred = pd.concat([test_data, df_label], axis=1)
-
-print("###---SAVE DATA TEST")
-data_pred.to_parquet(args.outfiletest)
+if __name__ == "__main__":
+    main()
