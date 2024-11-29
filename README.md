@@ -1,7 +1,7 @@
 # epiTCR-KDA: Knowledge Distillation model on Dihedral Angles for TCR-peptide prediction
 
 
-This repository contains the code and the data to train [epiTCR-KDA](https://academic.oup.com/bioinformaticsadvances/advance-article/doi/10.1093/bioadv/vbae190/7914039) model.
+This repository contains code and data to train [epiTCR-KDA](https://academic.oup.com/bioinformaticsadvances/advance-article/doi/10.1093/bioadv/vbae190/7914039) model.
 
 ## Requirements
 
@@ -12,7 +12,7 @@ This repository contains the code and the data to train [epiTCR-KDA](https://aca
 ## How to run epiTCR-KDA
 ![pipeline](https://github.com/ddiem-ri-4D/epiTCR-KDA/blob/main/assets/Figure1_cut.png)
 
-### 1. Clone the repository
+### 1. Clone repository
 ```bash
 git clone https://github.com/ddiem-ri-4D/epiTCR-KDA
 cd epiTCR-KDA/
@@ -22,11 +22,11 @@ source activate kda
 
 ### 2. Prepare data
 - Download training and testing data from [`datasets`](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/DATA_4MODEL) folder.
-- Download the 3D structure and dihedral angles of TCR and peptide from folders [`3DS_PDBFiles`](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/3DS_PDBFiles) and [`DA_TSVFiles`](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/DA_TSVFiles).
+- Download 3D structure and dihedral angles of TCR and peptide from folders [`3DS_PDBFiles`](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/3DS_PDBFiles) and [`DA_TSVFiles`](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/DA_TSVFiles).
 
-### 3. Check if TCR/pep sequences are present in the DA folders
-- Prepare a list containing unique TCR/peptides from the data for training/testing.
-- Check if the unique TCR/peptides are already present in the DA_TSVFiles folders or not by executing the following command:
+### 3. Check if TCR/pep sequences are present in DA folders
+- Prepare a list containing unique TCR/peptides from data for training/testing.
+- Check if unique TCR/peptides are already present in DA_TSVFiles folders or not by executing the following command:
 
 ```bash
 cd utils
@@ -34,16 +34,16 @@ python3 check3DSDA.py
 ```
 
 + If they are already complete, proceed to step 4.
-+ If not, run the 3D structure using [OmegaFold](https://github.com/HeliXonProtein/OmegaFold) and add the structure to the [PDB folders](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/3DS_PDBFiles), following the steps below:
++ If not, run 3D structure using [OmegaFold](https://github.com/HeliXonProtein/OmegaFold) and add structure to [PDB folders](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/3DS_PDBFiles), following steps below:
 
 #### 3.1 Run OmegaFold
-- Prepare a FASTA file containing the TCR/peptide sequences to run OmegaFold, see an example [here](https://github.com/ddiem-ri-4D/epiTCR-KDA/blob/main/datasets/DATA_4RUN/INPUT_FILE.fasta).
-- Refer to the OmegaFold running steps [here](https://github.com/HeliXonProtein/OmegaFold), and place the output into the [PDB files](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/3DS_PDBFiles) directory.
+- Prepare a FASTA file containing TCR/peptide sequences to run OmegaFold, see an example [here](https://github.com/ddiem-ri-4D/epiTCR-KDA/blob/main/datasets/DATA_4RUN/INPUT_FILE.fasta).
+- Refer to OmegaFold running steps [here](https://github.com/HeliXonProtein/OmegaFold), and place output into [PDB files](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/3DS_PDBFiles) directory.
 - Double-check for any TCR/peptides that might still lack a structure. If all structures are present, proceed to step 3.2.
 
 #### 3.2 Run Biopython
-- After obtaining the 3D structure, run [Biopython](https://biopython.org/docs/dev/api/Bio.PDB.internal_coords.html) to retrieve Dihedral Angles information, resulting in an output *.tsv file, see an example [here](https://github.com/ddiem-ri-4D/epiTCR-KDA/blob/main/datasets/DA_TSVFiles/AAFKGAQKLV.tsv).
-- The output *.tsv files containing Dihedral Angles information are placed into the [DA folders](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/DA_TSVFiles) directory.
+- After obtaining 3D structure, run [Biopython](https://biopython.org/docs/dev/api/Bio.PDB.internal_coords.html) to retrieve Dihedral Angles information, resulting in an output *.tsv file, see an example [here](https://github.com/ddiem-ri-4D/epiTCR-KDA/blob/main/datasets/DA_TSVFiles/AAFKGAQKLV.tsv).
+- output *.tsv files containing Dihedral Angles information are placed into [DA folders](https://github.com/ddiem-ri-4D/epiTCR-KDA/tree/main/datasets/DA_TSVFiles) directory.
 
 ```bash
 cd utils
