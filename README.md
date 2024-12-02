@@ -93,7 +93,8 @@ Please cite this paper if it helps your research:
     issn = {2635-0041},
     doi = {10.1093/bioadv/vbae190},
     url = {https://doi.org/10.1093/bioadv/vbae190},
-    eprint = {https://academic.oup.com/bioinformaticsadvances/advance-article-pdf/doi/10.1093/bioadv/vbae190/60923941/vbae190.pdf},}
+    eprint = {https://academic.oup.com/bioinformaticsadvances/advance-article-pdf/doi/10.1093/bioadv/vbae190/60923941/vbae190.pdf},
+}
 ```
 ### 7. Reference
 
