@@ -83,16 +83,17 @@ For more questions or feedback, please post an [Issue](https://github.com/ddiem-
 ### 6. Citation
 Please cite this paper if it helps your research:
 ```bibtex
-@article {Pham2024.05.18.594806,
-	author = {Pham, My-Diem Nguyen and Su, Chinh Tran-To and Nguyen, Thanh-Nhan and Nguyen, Hoai-Nghia and Nguyen, Dinh Duy An and Giang, Hoa and Nguyen, Dinh-Thuc and Phan, Minh-Duy and Nguyen, Vy},
-	title = {epiTCR-KDA: Knowledge Distillation model on Dihedral Angles for TCR-peptide prediction},
-	elocation-id = {2024.05.18.594806},
-	year = {2024},
-	doi = {10.1101/2024.05.18.594806},
-	publisher = {Cold Spring Harbor Laboratory},
-	URL = {https://www.biorxiv.org/content/early/2024/05/21/2024.05.18.594806},
-	eprint = {https://www.biorxiv.org/content/early/2024/05/21/2024.05.18.594806.full.pdf},
-	journal = {bioRxiv}}
+@article{10.1093/bioadv/vbae190,
+    author = {Pham, My-Diem Nguyen and Su, Chinh Tran-To and Nguyen, Thanh-Nhan and Nguyen, Hoai-Nghia and Nguyen, Dinh Duy An and Giang, Hoa and Nguyen, Dinh-Thuc and Phan, Minh-Duy and Nguyen, Vy},
+    title = {epiTCR-KDA: Knowledge Distillation model on Dihedral Angles for TCR-peptide prediction},
+    journal = {Bioinformatics Advances},
+    pages = {vbae190},
+    year = {2024},
+    month = {11},
+    issn = {2635-0041},
+    doi = {10.1093/bioadv/vbae190},
+    url = {https://doi.org/10.1093/bioadv/vbae190},
+    eprint = {https://academic.oup.com/bioinformaticsadvances/advance-article-pdf/doi/10.1093/bioadv/vbae190/60923941/vbae190.pdf},}
 ```
 ### 7. Reference
 
